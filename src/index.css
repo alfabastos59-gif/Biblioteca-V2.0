@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+:root {
+  --bg-main: #00101c;
+  --bg-surface: #001424;
+  --bg-card: #092032;
+  --bg-subtle: #031320;
+  --border-color: #163650;
+  --border-hover: #1dbb64;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-heading: #ffffff;
+  --accent-primary: #1dbb64;
+  --accent-blue: #1566c0;
+}
+
+html.light, :root.light {
+  --bg-main: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-subtle: #f1f5f9;
+  --border-color: #e2e8f0;
+  --border-hover: #23c65e;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --text-heading: #0f172a;
+  --accent-primary: #23c65e;
+  --accent-blue: #1566c0;
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: 'Poppins', sans-serif;
+    overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-subtle);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+/* Glass and Cards helper classes */
+.theme-surface {
+  background-color: var(--bg-surface);
+  border-color: var(--border-color);
+}
+
+.theme-card {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+
+.theme-subtle {
+  background-color: var(--bg-subtle);
+  border-color: var(--border-color);
+}
+
+/* Avatar Hover Zoom & Interactive Animation */
+.avatar-hover-zoom {
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, filter 0.28s ease;
+  will-change: transform;
+}
+
+.avatar-hover-zoom:hover {
+  transform: scale(1.22);
+  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.35));
+  z-index: 30;
+}
+
+.avatar-hover-zoom-sm:hover {
+  transform: scale(1.15);
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.25));
+  z-index: 20;
+}
+

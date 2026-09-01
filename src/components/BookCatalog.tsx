@@ -1,0 +1,349 @@
+import React, { useState, useMemo } from 'react';
+import { Search, SlidersHorizontal, Star, BookOpen } from 'lucide-react';
+import { Book } from '../types';
+import { CATEGORIES } from '../data/mockData';
+import { useTheme } from '../context/ThemeContext';
+
+interface BookCatalogProps {
+  books: Book[];
+  onSelectBook: (book: Book) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+}
+
+export const BookCatalog: React.FC<BookCatalogProps> = ({
+  books,
+  onSelectBook,
+  searchQuery,
+  setSearchQuery,
+}) => {
+  const { isDark } = useTheme();
+  const [selectedCategory, setSelectedCategory] = useState('Todos');
+  const [selectedStatus, setSelectedStatus] = useState<string>('todos');
+  const [sortBy, setSortBy] = useState<'rating' | 'title' | 'year'>('rating');
+  const [showFiltersModal, setShowFiltersModal] = useState(false);
+
+  // Filter books based on search, category, status and sorting
+  const filteredBooks = useMemo(() => {
+    return books
+      .filter((book) => {
+        const matchesQuery =
+          book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          book.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          book.synopsis.toLowerCase().includes(searchQuery.toLowerCase());
+
+        const matchesCategory =
+          selectedCategory === 'Todos' || book.category.toLowerCase() === selectedCategory.toLowerCase();
+
+        const matchesStatus =
+          selectedStatus === 'todos' || book.status === selectedStatus;
+
+        return matchesQuery && matchesCategory && matchesStatus;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'rating') return b.rating - a.rating;
+        if (sortBy === 'title') return a.title.localeCompare(b.title);
+        if (sortBy === 'year') return b.year - a.year;
+        return 0;
+      });
+  }, [books, searchQuery, selectedCategory, selectedStatus, sortBy]);
+
+  const getStatusBadge = (status: Book['status']) => {
+    switch (status) {
+      case 'disponivel':
+        return (
+          <span className="bg-[#23c65e] text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full backdrop-blur-sm shadow-sm flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            Disponível
+          </span>
+        );
+      case 'reservado':
+        return (
+          <span className="bg-[#7c3aed] text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full backdrop-blur-sm shadow-sm flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-white" />
+            Reservado
+          </span>
+        );
+      case 'em_andamento':
+        return (
+          <span className="bg-[#f0bd0b] text-slate-950 text-[11px] font-semibold px-2.5 py-0.5 rounded-full backdrop-blur-sm shadow-sm flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-900" />
+            Em andamento
+          </span>
+        );
+    }
+  };
+
+  return (
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+      {/* Title & Subtitle */}
+      <div className="mb-8">
+        <h1
+          className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
+            isDark ? 'text-white' : 'text-slate-900'
+          }`}
+        >
+          Catálogo de Livros
+        </h1>
+        <p className={`text-sm sm:text-base mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+          Encontre seu próximo livro
+        </p>
+      </div>
+
+      {/* Search & Filter Bar */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between mb-6">
+        <div className="relative flex-1">
+          <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
+          <input
+            id="catalog-search-input"
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar por título, autor ou palavra-chave..."
+            className={`w-full pl-11 pr-4 py-3 rounded-xl border text-sm transition-all focus:outline-none ${
+              isDark
+                ? 'bg-[#092032] text-white placeholder-slate-400 border-[#163650] focus:border-[#1dbb64] focus:ring-1 focus:ring-[#1dbb64]'
+                : 'bg-white text-slate-900 placeholder-slate-400 border-slate-200 focus:border-[#23c65e] focus:ring-1 focus:ring-[#23c65e] shadow-sm'
+            }`}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs px-2 py-0.5 rounded ${
+                isDark ? 'text-slate-400 hover:text-white bg-[#133e4a]' : 'text-slate-600 hover:text-slate-900 bg-slate-100'
+              }`}
+            >
+              Limpar
+            </button>
+          )}
+        </div>
+
+        {/* Filter Trigger Button */}
+        <button
+          id="btn-catalog-filters"
+          onClick={() => setShowFiltersModal(!showFiltersModal)}
+          className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${
+            showFiltersModal || selectedStatus !== 'todos' || sortBy !== 'rating'
+              ? isDark
+                ? 'bg-[#133e4a] text-emerald-400 border-emerald-500/50'
+                : 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-sm'
+              : isDark
+              ? 'bg-[#092032] text-slate-300 border-[#163650] hover:text-white hover:border-slate-500'
+              : 'bg-white text-slate-700 border-slate-200 hover:text-slate-900 hover:border-slate-300 shadow-sm'
+          }`}
+        >
+          <SlidersHorizontal className="w-4 h-4" />
+          <span>Filtros</span>
+          {(selectedStatus !== 'todos' || sortBy !== 'rating') && (
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          )}
+        </button>
+      </div>
+
+      {/* Filter Options Expandable */}
+      {showFiltersModal && (
+        <div
+          className={`border rounded-2xl p-4 sm:p-5 mb-6 animate-in slide-in-from-top-2 duration-200 ${
+            isDark ? 'bg-[#071828] border-[#163650]' : 'bg-white border-slate-200 shadow-md'
+          }`}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label className={`text-xs font-semibold block mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                Status de Disponibilidade
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: 'todos', label: 'Todos' },
+                  { id: 'disponivel', label: 'Disponíveis' },
+                  { id: 'reservado', label: 'Reservados' },
+                  { id: 'em_andamento', label: 'Em andamento' },
+                ].map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => setSelectedStatus(s.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                      selectedStatus === s.id
+                        ? 'bg-[#23c65e] text-white font-semibold shadow-sm'
+                        : isDark
+                        ? 'bg-[#092032] text-slate-400 hover:text-white'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className={`text-xs font-semibold block mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                Ordenar Por
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: 'rating', label: 'Melhor Avaliados' },
+                  { id: 'title', label: 'Título (A-Z)' },
+                  { id: 'year', label: 'Ano de Publicação' },
+                ].map((o) => (
+                  <button
+                    key={o.id}
+                    onClick={() => setSortBy(o.id as any)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                      sortBy === o.id
+                        ? 'bg-[#23c65e] text-white font-semibold shadow-sm'
+                        : isDark
+                        ? 'bg-[#092032] text-slate-400 hover:text-white'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-end justify-start sm:justify-end">
+              <button
+                onClick={() => {
+                  setSelectedStatus('todos');
+                  setSortBy('rating');
+                  setSelectedCategory('Todos');
+                  setSearchQuery('');
+                }}
+                className={`text-xs underline cursor-pointer ${
+                  isDark ? 'text-slate-400 hover:text-rose-400' : 'text-slate-500 hover:text-rose-600'
+                }`}
+              >
+                Resetar todos os filtros
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Category Filter Pills (Panel 2 matching) */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 no-scrollbar">
+        {CATEGORIES.map((category) => (
+          <button
+            key={category}
+            id={`filter-cat-${category.toLowerCase()}`}
+            onClick={() => setSelectedCategory(category)}
+            className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
+              selectedCategory === category
+                ? 'bg-[#23c65e] text-white shadow-sm font-bold'
+                : isDark
+                ? 'bg-[#092032] text-slate-300 hover:text-white border border-[#163650] hover:border-slate-500'
+                : 'bg-white text-slate-700 hover:text-slate-900 border border-slate-200 hover:border-slate-300 shadow-sm'
+            }`}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+
+      {/* Book Grid */}
+      {filteredBooks.length === 0 ? (
+        <div
+          className={`border rounded-2xl p-12 text-center my-8 ${
+            isDark ? 'bg-[#092032] border-[#163650]' : 'bg-white border-slate-200 shadow-sm'
+          }`}
+        >
+          <BookOpen className="w-12 h-12 text-slate-400 mx-auto mb-3 opacity-60" />
+          <h3 className={`text-lg font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            Nenhum livro encontrado
+          </h3>
+          <p className={`text-sm max-w-md mx-auto mb-4 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+            Não encontramos livros para o termo buscado ou filtro selecionado.
+          </p>
+          <button
+            onClick={() => {
+              setSearchQuery('');
+              setSelectedCategory('Todos');
+              setSelectedStatus('todos');
+            }}
+            className="px-4 py-2 rounded-xl bg-[#23c65e] text-white text-xs font-semibold cursor-pointer shadow-sm"
+          >
+            Limpar Filtros
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
+          {filteredBooks.map((book) => (
+            <div
+              key={book.id}
+              id={`catalog-book-${book.id}`}
+              className={`group border rounded-2xl p-3 sm:p-4 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 cursor-pointer ${
+                isDark
+                  ? 'bg-[#092032] border-[#163650] hover:border-[#1dbb64] hover:shadow-[0_12px_30px_rgba(0,0,0,0.5),0_0_18px_rgba(29,187,100,0.18)]'
+                  : 'bg-white border-slate-200 hover:border-[#23c65e] hover:shadow-lg shadow-sm'
+              }`}
+            >
+              <div>
+                {/* Book Cover with Status Pill */}
+                <div
+                  className={`relative aspect-[3/4] w-full rounded-xl overflow-hidden mb-3.5 border ${
+                    isDark ? 'bg-[#031320] border-[#1e3a5f]/50' : 'bg-slate-100 border-slate-200'
+                  }`}
+                >
+                  <img
+                    src={book.cover}
+                    alt={book.title}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&auto=format&fit=crop&q=80';
+                    }}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute top-2.5 left-2.5">
+                    {getStatusBadge(book.status)}
+                  </div>
+                </div>
+
+                {/* Info */}
+                <h3
+                  className={`text-sm sm:text-base font-bold transition-colors line-clamp-1 ${
+                    isDark
+                      ? 'text-white group-hover:text-[#1dbb64]'
+                      : 'text-slate-900 group-hover:text-[#23c65e]'
+                  }`}
+                >
+                  {book.title}
+                </h3>
+                <p className={`text-xs line-clamp-1 mb-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  {book.author}
+                </p>
+
+                {/* Rating */}
+                <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-4">
+                  <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                  <span className={`font-bold ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
+                    {book.rating}
+                  </span>
+                  <span className={isDark ? 'text-slate-500' : 'text-slate-400'}>
+                    ({book.reviewsCount})
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <button
+                id={`btn-details-${book.id}`}
+                onClick={() => onSelectBook(book)}
+                className={`w-full py-2 px-3 rounded-xl border text-xs sm:text-sm font-semibold transition-all duration-150 flex items-center justify-center gap-1 cursor-pointer ${
+                  isDark
+                    ? 'bg-[#092032] hover:bg-[#1dbb64] text-emerald-400 hover:text-slate-950 border-[#1dbb64]/40 hover:border-[#1dbb64]'
+                    : 'bg-slate-50 hover:bg-[#23c65e] text-slate-700 hover:text-white border-slate-200 hover:border-[#23c65e]'
+                }`}
+              >
+                <span>Ver detalhes</span>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+};
+
