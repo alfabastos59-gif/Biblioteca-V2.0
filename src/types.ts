@@ -124,7 +124,7 @@ export interface AuditLog {
 }
 
 export type ActiveTab = 'inicio' | 'catalogo' | 'ranking' | 'emprestimos' | 'sugestoes' | 'sobre' | 'admin' | 'relatorios' | 'mobile_view' | 'meu_historico';
-export type AdminSection = 'dashboard' | 'emprestimos' | 'livros' | 'alunos' | 'sugestoes' | 'usuarios_adm' | 'auditoria' | 'relatorios' | 'backup' | 'configuracoes';
+export type AdminSection = 'dashboard' | 'emprestimos' | 'livros' | 'alunos' | 'sugestoes' | 'usuarios_adm' | 'auditoria' | 'relatorios' | 'backup' | 'configuracoes' | 'carteirinhas';
 export type MobileTab = 'inicio' | 'catalogo' | 'emprestimos' | 'perfil';
 
 export type UserRole = 'guest' | 'student' | 'admin';

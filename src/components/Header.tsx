@@ -13,7 +13,9 @@ import {
   Lock,
   Sun,
   Moon,
-  Trophy
+  Trophy,
+  Palette,
+  Sparkles
 } from 'lucide-react';
 import { ActiveTab, UserSession } from '../types';
 import { Logo } from './Logo';
@@ -41,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const { theme, toggleTheme, isDark } = useTheme();
+  const { theme, toggleTheme, setTheme, isDark, isKinetic, isClassicDark, isLight } = useTheme();
 
   const isStudent = session.role === 'student';
   const isAdmin = session.role === 'admin';
@@ -73,7 +75,9 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header
       className={`sticky top-0 z-40 backdrop-blur-md transition-colors duration-200 border-b ${
-        isDark
+        isKinetic
+          ? 'bg-[#0c1014]/95 border-[#2a313a] text-slate-100'
+          : isDark
           ? 'bg-[#001424]/95 border-[#163650] text-slate-100'
           : 'bg-white/95 border-slate-200 text-slate-900 shadow-sm'
       }`}
@@ -92,7 +96,9 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Desktop Navigation Links */}
           <nav
             className={`hidden md:flex items-center gap-1 p-1.5 rounded-full border transition-colors ${
-              isDark
+              isKinetic
+                ? 'bg-[#1a1c1e] border-[#2a313a]'
+                : isDark
                 ? 'bg-[#092032]/80 border-[#163650]'
                 : 'bg-slate-100 border-slate-200'
             }`}
@@ -102,9 +108,13 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveTab('inicio')}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer ${
                 activeTab === 'inicio'
-                  ? isDark
+                  ? isKinetic
+                    ? 'bg-[#0088cc] text-white font-bold shadow-[0_0_12px_rgba(0,136,204,0.4)]'
+                    : isDark
                     ? 'bg-[#1dbb64] text-slate-950 font-bold shadow-[0_0_12px_rgba(29,187,100,0.4)]'
                     : 'bg-[#23c65e] text-white font-bold shadow-sm'
+                  : isKinetic
+                  ? 'text-slate-300 hover:text-white hover:bg-[#2a313a]'
                   : isDark
                   ? 'text-slate-300 hover:text-white hover:bg-[#133e4a]/60'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
@@ -117,9 +127,13 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveTab('catalogo')}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer ${
                 activeTab === 'catalogo'
-                  ? isDark
+                  ? isKinetic
+                    ? 'bg-[#0088cc] text-white font-bold shadow-[0_0_12px_rgba(0,136,204,0.4)]'
+                    : isDark
                     ? 'bg-[#1dbb64] text-slate-950 font-bold shadow-[0_0_12px_rgba(29,187,100,0.4)]'
                     : 'bg-[#23c65e] text-white font-bold shadow-sm'
+                  : isKinetic
+                  ? 'text-slate-300 hover:text-white hover:bg-[#2a313a]'
                   : isDark
                   ? 'text-slate-300 hover:text-white hover:bg-[#133e4a]/60'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
@@ -132,9 +146,13 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveTab('ranking')}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'ranking'
-                  ? isDark
+                  ? isKinetic
+                    ? 'bg-[#0088cc] text-white font-bold shadow-[0_0_12px_rgba(0,136,204,0.4)]'
+                    : isDark
                     ? 'bg-[#1dbb64] text-slate-950 font-bold shadow-[0_0_12px_rgba(29,187,100,0.4)]'
                     : 'bg-[#23c65e] text-white font-bold shadow-sm'
+                  : isKinetic
+                  ? 'text-slate-300 hover:text-white hover:bg-[#2a313a]'
                   : isDark
                   ? 'text-slate-300 hover:text-white hover:bg-[#133e4a]/60'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
@@ -151,9 +169,13 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => setActiveTab('meu_historico')}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                   activeTab === 'meu_historico'
-                    ? isDark
+                    ? isKinetic
+                      ? 'bg-[#00a651] text-white font-bold shadow-[0_0_12px_rgba(0,166,81,0.4)]'
+                      : isDark
                       ? 'bg-emerald-500 text-slate-950 font-bold shadow-[0_0_12px_rgba(29,187,100,0.4)]'
                       : 'bg-[#23c65e] text-white font-bold shadow-sm'
+                    : isKinetic
+                    ? 'text-[#00a651] hover:text-[#00a651]/80 hover:bg-[#2a313a]'
                     : isDark
                     ? 'text-emerald-400 hover:text-emerald-300 hover:bg-[#133e4a]/60'
                     : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50'
@@ -169,9 +191,13 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveTab('sugestoes')}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer ${
                 activeTab === 'sugestoes'
-                  ? isDark
+                  ? isKinetic
+                    ? 'bg-[#0088cc] text-white font-bold shadow-[0_0_12px_rgba(0,136,204,0.4)]'
+                    : isDark
                     ? 'bg-[#1dbb64] text-slate-950 font-bold shadow-[0_0_12px_rgba(29,187,100,0.4)]'
                     : 'bg-[#23c65e] text-white font-bold shadow-sm'
+                  : isKinetic
+                  ? 'text-slate-300 hover:text-white hover:bg-[#2a313a]'
                   : isDark
                   ? 'text-slate-300 hover:text-white hover:bg-[#133e4a]/60'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
@@ -184,9 +210,13 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveTab('sobre')}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer ${
                 activeTab === 'sobre'
-                  ? isDark
+                  ? isKinetic
+                    ? 'bg-[#0088cc] text-white font-bold shadow-[0_0_12px_rgba(0,136,204,0.4)]'
+                    : isDark
                     ? 'bg-[#1dbb64] text-slate-950 font-bold shadow-[0_0_12px_rgba(29,187,100,0.4)]'
                     : 'bg-[#23c65e] text-white font-bold shadow-sm'
+                  : isKinetic
+                  ? 'text-slate-300 hover:text-white hover:bg-[#2a313a]'
                   : isDark
                   ? 'text-slate-300 hover:text-white hover:bg-[#133e4a]/60'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
@@ -201,7 +231,9 @@ export const Header: React.FC<HeaderProps> = ({
             {/* View Switcher Pills */}
             <div
               className={`flex items-center p-1 rounded-xl border ${
-                isDark
+                isKinetic
+                  ? 'bg-[#1a1c1e] border-[#2a313a]'
+                  : isDark
                   ? 'bg-[#071828] border-[#163650]'
                   : 'bg-slate-100 border-slate-200'
               }`}
@@ -230,7 +262,9 @@ export const Header: React.FC<HeaderProps> = ({
                 title={isAdmin ? 'Relatórios Gerais da Biblioteca' : 'Acesso Restrito ao Administrador'}
                 className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
                   activeTab === 'relatorios'
-                    ? isDark
+                    ? isKinetic
+                      ? 'bg-[#0088cc]/20 text-[#0088cc] border border-[#0088cc]/40 shadow-sm font-bold'
+                      : isDark
                       ? 'bg-[#133e4a] text-emerald-400 border border-emerald-500/40 shadow-sm font-bold'
                       : 'bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm font-bold'
                     : isDark
@@ -248,7 +282,9 @@ export const Header: React.FC<HeaderProps> = ({
                 title="Abrir Simulador Mobile"
                 className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
                   activeTab === 'mobile_view'
-                    ? isDark
+                    ? isKinetic
+                      ? 'bg-[#0088cc]/20 text-[#0088cc] border border-[#0088cc]/40 shadow-sm font-bold'
+                      : isDark
                       ? 'bg-[#133e4a] text-emerald-400 border border-emerald-500/40 shadow-sm'
                       : 'bg-blue-100 text-blue-800 border border-blue-300 shadow-sm font-bold'
                     : isDark
@@ -261,26 +297,35 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             </div>
 
-            {/* THEME TOGGLE SWITCH (DARK / LIGHT AS REQUESTED) */}
+            {/* THEME TOGGLE SWITCH (DARK / LIGHT / KINETIC) */}
             <button
               id="btn-toggle-theme"
               onClick={toggleTheme}
-              title={isDark ? 'Mudar para Tema Claro (Imagem)' : 'Mudar para Tema Escuro (Atual)'}
+              title={`Tema atual: ${
+                isKinetic ? 'Kinetic' : isClassicDark ? 'Escuro' : 'Claro'
+              }. Clique para alternar (Escuro → Claro → Kinetic)`}
               className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 text-xs font-medium transition-all cursor-pointer ${
-                isDark
+                isKinetic
+                  ? 'bg-[#1a1c1e] hover:bg-[#2a313a] text-[#0088cc] border-[#2a313a] shadow-sm'
+                  : isClassicDark
                   ? 'bg-[#092032] hover:bg-[#133e4a] text-amber-300 border-[#163650]'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300 shadow-sm'
               }`}
             >
-              {isDark ? (
+              {isKinetic ? (
+                <>
+                  <Palette className="w-4 h-4 text-[#0088cc]" />
+                  <span className="hidden xl:inline text-[11px] font-semibold text-slate-200">Kinetic</span>
+                </>
+              ) : isClassicDark ? (
                 <>
                   <Moon className="w-4 h-4 text-emerald-400" />
-                  <span className="hidden xl:inline text-[11px] font-semibold text-slate-300">Tema Escuro</span>
+                  <span className="hidden xl:inline text-[11px] font-semibold text-slate-300">Escuro</span>
                 </>
               ) : (
                 <>
                   <Sun className="w-4 h-4 text-amber-500" />
-                  <span className="hidden xl:inline text-[11px] font-semibold text-slate-700">Tema Claro</span>
+                  <span className="hidden xl:inline text-[11px] font-semibold text-slate-700">Claro</span>
                 </>
               )}
             </button>
@@ -468,24 +513,72 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Theme Quick Selector in Mobile */}
           <div
-            className={`flex items-center justify-between p-2.5 rounded-xl border ${
-              isDark ? 'bg-[#001424] border-[#163650]' : 'bg-white border-slate-200'
+            className={`p-3 rounded-2xl border ${
+              isKinetic
+                ? 'bg-[#1a1c1e] border-[#2a313a]'
+                : isDark
+                ? 'bg-[#001424] border-[#163650]'
+                : 'bg-white border-slate-200'
             }`}
           >
-            <span className={`text-xs font-medium ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-              Tema Atual: <strong className="text-emerald-500">{isDark ? 'Escuro (Deep Navy)' : 'Claro (Moderno Escola)'}</strong>
-            </span>
-            <button
-              onClick={toggleTheme}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 border ${
-                isDark
-                  ? 'bg-[#092032] text-amber-300 border-[#163650]'
-                  : 'bg-slate-100 text-slate-900 border-slate-300'
-              }`}
-            >
-              {isDark ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-blue-500" />}
-              <span>Alternar Tema</span>
-            </button>
+            <div className="flex items-center justify-between mb-2">
+              <span className={`text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                Tema Visual
+              </span>
+              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md ${
+                isKinetic
+                  ? 'bg-[#0088cc]/20 text-[#0088cc]'
+                  : isClassicDark
+                  ? 'bg-emerald-500/20 text-emerald-400'
+                  : 'bg-amber-100 text-amber-800'
+              }`}>
+                {isKinetic ? 'Kinetic' : isClassicDark ? 'Escuro' : 'Claro'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-1.5">
+              <button
+                onClick={() => setTheme('dark')}
+                className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 border transition-all cursor-pointer ${
+                  isClassicDark
+                    ? 'bg-[#092032] text-emerald-400 border-emerald-500/40 shadow-sm'
+                    : isDark
+                    ? 'bg-[#0c141c] text-slate-400 border-[#1e3a5f]/40 hover:text-slate-200'
+                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900'
+                }`}
+              >
+                <Moon className="w-3.5 h-3.5" />
+                <span>Escuro</span>
+              </button>
+
+              <button
+                onClick={() => setTheme('light')}
+                className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 border transition-all cursor-pointer ${
+                  isLight
+                    ? 'bg-amber-100 text-amber-900 border-amber-300 shadow-sm'
+                    : isDark
+                    ? 'bg-[#0c141c] text-slate-400 border-[#1e3a5f]/40 hover:text-slate-200'
+                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900'
+                }`}
+              >
+                <Sun className="w-3.5 h-3.5" />
+                <span>Claro</span>
+              </button>
+
+              <button
+                onClick={() => setTheme('kinetic')}
+                className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 border transition-all cursor-pointer ${
+                  isKinetic
+                    ? 'bg-[#0088cc]/20 text-[#0088cc] border-[#0088cc]/50 shadow-sm'
+                    : isDark
+                    ? 'bg-[#0c141c] text-slate-400 border-[#1e3a5f]/40 hover:text-slate-200'
+                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900'
+                }`}
+              >
+                <Palette className="w-3.5 h-3.5" />
+                <span>Kinetic</span>
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2 mb-3">

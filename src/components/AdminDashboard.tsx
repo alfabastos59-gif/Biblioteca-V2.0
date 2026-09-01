@@ -32,13 +32,15 @@ import {
   UserPlus,
   Award,
   ShieldCheck,
-  Shield
+  Shield,
+  CreditCard
 } from 'lucide-react';
 import { Book, Loan, Student, Suggestion, AdminSection, ActiveTab, AdminUser, AuditLog } from '../types';
 import { Logo } from './Logo';
 import { BackupRestoreView } from './BackupRestoreView';
 import { StudentModal } from './StudentModal';
 import { StudentHistoryModal } from './StudentHistoryModal';
+import { StudentCardModal } from './StudentCardModal';
 import { AdminUsersView } from './AdminUsersView';
 import { AuditLogView } from './AuditLogView';
 import { AdminUserModal } from './AdminUserModal';
@@ -122,6 +124,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [studentToEdit, setStudentToEdit] = useState<Student | null>(null);
   const [isStudentHistoryOpen, setIsStudentHistoryOpen] = useState(false);
   const [studentForHistory, setStudentForHistory] = useState<Student | null>(null);
+  const [isStudentCardModalOpen, setIsStudentCardModalOpen] = useState(false);
+  const [studentForCard, setStudentForCard] = useState<Student | null>(null);
   const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
   const [suggestionToDelete, setSuggestionToDelete] = useState<Suggestion | null>(null);
 
@@ -262,6 +266,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               { id: 'emprestimos', label: 'Empréstimos', icon: BookmarkCheck },
               { id: 'livros', label: 'Livros', icon: BookOpen },
               { id: 'alunos', label: 'Alunos', icon: Users },
+              { id: 'carteirinhas', label: 'Carteira do Estudante', icon: CreditCard },
               { id: 'sugestoes', label: 'Sugestões', icon: Lightbulb },
               { id: 'usuarios_adm', label: 'Usuários ADM', icon: ShieldCheck },
               { id: 'auditoria', label: 'Histórico & Auditoria', icon: History },
@@ -278,6 +283,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   onClick={() => {
                     if (item.id === 'relatorios') {
                       setActiveTab('relatorios');
+                    } else if (item.id === 'carteirinhas') {
+                      setStudentForCard(null);
+                      setIsStudentCardModalOpen(true);
                     } else {
                       setAdminSection(item.id as AdminSection);
                     }
@@ -345,6 +353,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Carteira do Estudante Button in Header */}
+            <button
+              id="btn-admin-header-carteirinhas"
+              onClick={() => {
+                setStudentForCard(null);
+                setIsStudentCardModalOpen(true);
+              }}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md bg-[#004d2c] hover:bg-[#00663a] text-white active:scale-95 border border-emerald-500/30"
+              title="Gerar e imprimir carteirinhas dos estudantes"
+            >
+              <CreditCard className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Carteira do Estudante</span>
+            </button>
+
             {/* Quick New Loan Button */}
             <button
               id="btn-admin-header-new-loan"
@@ -995,22 +1017,40 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className={`border rounded-2xl p-5 shadow-xl space-y-4 ${
                 isDark ? 'bg-[#002237] border-[#163e5e]' : 'bg-white border-slate-200'
               }`}>
-                {/* Header with Title and '+ Novo aluno' button */}
-                <div className="flex items-center justify-between gap-4">
+                {/* Header with Title, Carteira do Estudante and '+ Novo aluno' button */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <h3 className={`font-bold text-lg font-serif tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     Alunos cadastrados ({filteredStudents.length})
                   </h3>
-                  <button
-                    id="btn-add-new-student"
-                    onClick={() => {
-                      setStudentToEdit(null);
-                      setIsStudentModalOpen(true);
-                    }}
-                    className="px-4 py-2.5 rounded-xl bg-[#009b5a] hover:bg-[#00b368] text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shadow-emerald-950/40"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Novo aluno</span>
-                  </button>
+                  <div className="flex items-center gap-2.5">
+                    <button
+                      id="btn-print-all-student-cards"
+                      onClick={() => {
+                        setStudentForCard(null);
+                        setIsStudentCardModalOpen(true);
+                      }}
+                      className={`px-3.5 py-2.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+                        isDark
+                          ? 'bg-[#004d2c]/60 hover:bg-[#00663a] text-emerald-300 border-emerald-500/40'
+                          : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+                      }`}
+                    >
+                      <CreditCard className="w-4 h-4 text-emerald-400" />
+                      <span>Carteira do Estudante</span>
+                    </button>
+
+                    <button
+                      id="btn-add-new-student"
+                      onClick={() => {
+                        setStudentToEdit(null);
+                        setIsStudentModalOpen(true);
+                      }}
+                      className="px-4 py-2.5 rounded-xl bg-[#009b5a] hover:bg-[#00b368] text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shadow-emerald-950/40"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Novo aluno</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Search Bar */}
@@ -1128,7 +1168,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             <td className={`py-3 px-4 text-center last:rounded-r-xl border-y border-r ${
                               isDark ? 'border-[#163e5e]' : 'border-slate-200'
                             }`}>
-                              <div className="flex items-center justify-center gap-2.5">
+                              <div className="flex items-center justify-center gap-2">
+                                {/* Carteira do Estudante */}
+                                <button
+                                  id={`btn-student-card-${student.id}`}
+                                  onClick={() => {
+                                    setStudentForCard(student);
+                                    setIsStudentCardModalOpen(true);
+                                  }}
+                                  title="Imprimir Carteira do Estudante (com Código de Barras e Avatar)"
+                                  className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                                    isDark
+                                      ? 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20'
+                                      : 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-100'
+                                  }`}
+                                >
+                                  <CreditCard className="w-4 h-4" />
+                                </button>
+
                                 {/* Histórico */}
                                 <button
                                   id={`btn-student-history-${student.id}`}
@@ -1867,6 +1924,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </div>
       )}
+
+      {/* Modal da Carteira do Estudante */}
+      <StudentCardModal
+        isOpen={isStudentCardModalOpen}
+        onClose={() => {
+          setIsStudentCardModalOpen(false);
+          setStudentForCard(null);
+        }}
+        students={students}
+        initialSelectedStudent={studentForCard}
+      />
     </div>
   );
 };

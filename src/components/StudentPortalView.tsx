@@ -1,7 +1,8 @@
-import React from 'react';
-import { BookOpen, CheckCircle, Clock, AlertTriangle, Calendar, ArrowRight, ShieldAlert, LogOut, Sparkles, BookCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { BookOpen, CheckCircle, Clock, AlertTriangle, Calendar, ArrowRight, ShieldAlert, LogOut, Sparkles, BookCheck, CreditCard } from 'lucide-react';
 import { Student, Loan, Book } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { StudentCardModal } from './StudentCardModal';
 
 interface StudentPortalViewProps {
   student: Student;
@@ -21,6 +22,7 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
   onRequestReturn,
 }) => {
   const { isDark } = useTheme();
+  const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const studentCode = (student.studentCode || '').replace(/^ALU-/, '');
   
   // Filter loans strictly for this student
@@ -90,6 +92,20 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
           </div>
 
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
+            <button
+              id="btn-student-my-card"
+              onClick={() => setIsCardModalOpen(true)}
+              className={`px-3.5 py-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer ${
+                isDark
+                  ? 'bg-[#004d2c]/60 hover:bg-[#00663a] text-emerald-300 border-emerald-500/40'
+                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+              }`}
+              title="Visualizar e Imprimir minha Carteira do Estudante"
+            >
+              <CreditCard className="w-4 h-4 text-emerald-400" />
+              <span>Minha Carteirinha</span>
+            </button>
+
             <button
               onClick={onOpenCatalog}
               className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-[#23c65e] hover:bg-[#1fa950] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
@@ -294,6 +310,14 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* Modal da Carteira do Estudante */}
+      <StudentCardModal
+        isOpen={isCardModalOpen}
+        onClose={() => setIsCardModalOpen(false)}
+        students={[student]}
+        initialSelectedStudent={student}
+      />
     </div>
   );
 };

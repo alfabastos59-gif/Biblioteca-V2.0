@@ -27,7 +27,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   setSearchQuery,
   onSearchSubmit,
 }) => {
-  const { isDark } = useTheme();
+  const { isDark, isKinetic } = useTheme();
   const featuredBooks = books.filter((b) => b.featured).slice(0, 5);
   const activeLoansCount = loans.filter((l) => l.status === 'em_andamento' || l.status === 'atrasado').length;
 
@@ -36,7 +36,9 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       {/* Hero Visual Section */}
       <div
         className={`relative pt-8 pb-16 lg:pt-14 lg:pb-20 border-b transition-colors duration-200 ${
-          isDark
+          isKinetic
+            ? 'bg-[#0c1014] border-[#2a313a]'
+            : isDark
             ? 'bg-[#001424] border-[#163650]/60'
             : 'bg-gradient-to-b from-slate-100 via-white to-slate-50 border-slate-200'
         }`}
@@ -62,12 +64,18 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             {/* Institution Badge */}
             <div
               className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-4 shadow-sm border ${
-                isDark
+                isKinetic
+                  ? 'bg-[#1a1c1e] border-[#2a313a] text-[#0088cc]'
+                  : isDark
                   ? 'bg-[#092032] border-[#163650] text-emerald-400'
                   : 'bg-white border-emerald-200 text-emerald-700 shadow-sm'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-[#23c65e] animate-pulse" />
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  isKinetic ? 'bg-[#0088cc]' : 'bg-[#23c65e]'
+                } animate-pulse`}
+              />
               <span>Colégio Estadual do Campo Maria Quitéria - TI</span>
             </div>
 
@@ -80,7 +88,9 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               Nossa Biblioteca, <br />
               <span
                 className={
-                  isDark
+                  isKinetic
+                    ? 'text-[#0088cc] drop-shadow-[0_0_25px_rgba(0,136,204,0.4)]'
+                    : isDark
                     ? 'text-[#1dbb64] drop-shadow-[0_0_25px_rgba(29,187,100,0.35)]'
                     : 'text-[#23c65e]'
                 }
@@ -106,7 +116,9 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Buscar livros, autores, categorias..."
                   className={`w-full pl-5 pr-14 py-4 rounded-2xl border text-sm sm:text-base transition-all focus:outline-none ${
-                    isDark
+                    isKinetic
+                      ? 'bg-[#1a1c1e] text-white placeholder-slate-400 border-[#2a313a] focus:border-[#0088cc] focus:ring-2 focus:ring-[#0088cc]/30 shadow-lg'
+                      : isDark
                       ? 'bg-[#092032]/95 text-white placeholder-slate-400 border-[#1e3a5f] focus:border-[#1dbb64] focus:ring-2 focus:ring-[#1dbb64]/30 shadow-lg'
                       : 'bg-white text-slate-900 placeholder-slate-400 border-slate-200 focus:border-[#23c65e] focus:ring-2 focus:ring-[#23c65e]/20 shadow-md'
                   }`}
@@ -116,7 +128,9 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                   type="submit"
                   title="Buscar"
                   className={`absolute right-2 top-2 bottom-2 px-4 rounded-xl flex items-center justify-center transition-colors shadow-sm cursor-pointer ${
-                    isDark
+                    isKinetic
+                      ? 'bg-[#0088cc] hover:bg-[#0077b5] text-white shadow-[0_0_10px_rgba(0,136,204,0.35)]'
+                      : isDark
                       ? 'bg-[#1dbb64] hover:bg-[#16a354] text-white shadow-[0_0_10px_rgba(29,187,100,0.3)]'
                       : 'bg-[#23c65e] hover:bg-[#1fa950] text-white'
                   }`}
@@ -132,7 +146,9 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             {/* 1. Livros cadastrados */}
             <div
               className={`backdrop-blur-sm border rounded-2xl p-4 sm:p-5 flex items-center gap-4 transition-colors shadow-sm ${
-                isDark
+                isKinetic
+                  ? 'bg-[#1a1c1e] border-[#2a313a] hover:border-[#0088cc]/50'
+                  : isDark
                   ? 'bg-[#092032]/80 border-[#163650] hover:border-emerald-500/40'
                   : 'bg-white border-slate-200 hover:border-blue-300'
               }`}
@@ -157,12 +173,20 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             {/* 2. Alunos cadastrados */}
             <div
               className={`backdrop-blur-sm border rounded-2xl p-4 sm:p-5 flex items-center gap-4 transition-colors shadow-sm ${
-                isDark
+                isKinetic
+                  ? 'bg-[#1a1c1e] border-[#2a313a] hover:border-[#00a651]/50'
+                  : isDark
                   ? 'bg-[#092032]/80 border-[#163650] hover:border-purple-500/40'
                   : 'bg-white border-slate-200 hover:border-purple-300'
               }`}
             >
-              <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-500 shrink-0">
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                  isKinetic
+                    ? 'bg-[#00a651]/15 border border-[#00a651]/30 text-[#00a651]'
+                    : 'bg-purple-500/10 border border-purple-500/30 text-purple-500'
+                }`}
+              >
                 <Users className="w-6 h-6" />
               </div>
               <div>
@@ -182,12 +206,20 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             {/* 3. Empréstimos ativos */}
             <div
               className={`backdrop-blur-sm border rounded-2xl p-4 sm:p-5 flex items-center gap-4 transition-colors shadow-sm ${
-                isDark
+                isKinetic
+                  ? 'bg-[#1a1c1e] border-[#2a313a] hover:border-[#f25622]/50'
+                  : isDark
                   ? 'bg-[#092032]/80 border-[#163650] hover:border-amber-500/40'
                   : 'bg-white border-slate-200 hover:border-amber-300'
               }`}
             >
-              <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 shrink-0">
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                  isKinetic
+                    ? 'bg-[#f25622]/15 border border-[#f25622]/30 text-[#f25622]'
+                    : 'bg-amber-500/10 border border-amber-500/30 text-amber-500'
+                }`}
+              >
                 <RefreshCw className="w-6 h-6" />
               </div>
               <div>
@@ -207,12 +239,20 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             {/* 4. Total de empréstimos */}
             <div
               className={`backdrop-blur-sm border rounded-2xl p-4 sm:p-5 flex items-center gap-4 transition-colors shadow-sm ${
-                isDark
+                isKinetic
+                  ? 'bg-[#1a1c1e] border-[#2a313a] hover:border-[#0088cc]/50'
+                  : isDark
                   ? 'bg-[#092032]/80 border-[#163650] hover:border-emerald-500/40'
                   : 'bg-white border-slate-200 hover:border-emerald-300'
               }`}
             >
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-[#23c65e] shrink-0">
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                  isKinetic
+                    ? 'bg-[#0088cc]/15 border border-[#0088cc]/30 text-[#0088cc]'
+                    : 'bg-emerald-500/10 border border-emerald-500/30 text-[#23c65e]'
+                }`}
+              >
                 <BarChart3 className="w-6 h-6" />
               </div>
               <div>

@@ -99,25 +99,31 @@ export const DesignSystemModal: React.FC<DesignSystemModalProps> = ({ isOpen, on
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Cores */}
             <div className={`p-5 rounded-2xl border ${isDark ? 'bg-[#092032] border-[#163650]' : 'bg-slate-50 border-slate-200'}`}>
-              <h3 className={`text-sm font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Cores</h3>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Cores do Sistema</h3>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400">3 Temas</span>
+              </div>
+              <div className="grid grid-cols-4 gap-2.5">
                 {[
-                  { hex: '#00182A', name: 'Background' },
-                  { hex: '#133E4A', name: 'Card Slate' },
-                  { hex: '#1E3A5F', name: 'Accent Blue' },
-                  { hex: '#1DBB64', name: 'Primary Green' },
-                  { hex: '#BB5CF6', name: 'Purple Tag' },
+                  { hex: '#0088CC', name: 'Kinetic Cyan' },
+                  { hex: '#00A651', name: 'Kinetic Green' },
+                  { hex: '#F25622', name: 'Kinetic Orange' },
+                  { hex: '#0C1014', name: 'Kinetic Charcoal' },
+                  { hex: '#00182A', name: 'Dark Navy' },
+                  { hex: '#1DBB64', name: 'Classic Green' },
+                  { hex: '#133E4A', name: 'Deep Slate' },
                   { hex: '#EF4444', name: 'Danger Red' },
-                  { hex: '#EAB308', name: 'Warning Yellow' },
-                  { hex: '#94A3B8', name: 'Text Secondary' },
                 ].map((color) => (
-                  <div key={color.hex} className="flex flex-col items-center gap-1.5">
+                  <div key={color.hex} className="flex flex-col items-center gap-1">
                     <div
                       style={{ backgroundColor: color.hex }}
-                      className="w-10 h-10 rounded-full border border-black/10 dark:border-white/20 shadow-md"
+                      className="w-9 h-9 rounded-full border border-black/10 dark:border-white/20 shadow-md"
                     />
                     <span className={`text-[10px] font-mono font-bold ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                       {color.hex}
+                    </span>
+                    <span className={`text-[9px] truncate max-w-full ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                      {color.name}
                     </span>
                   </div>
                 ))}

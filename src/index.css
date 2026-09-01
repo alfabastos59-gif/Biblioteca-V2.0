@@ -25,7 +25,27 @@ html.light, :root.light {
   --text-muted: #64748b;
   --text-heading: #0f172a;
   --accent-primary: #23c65e;
+  --accent-secondary: #00a651;
+  --accent-tertiary: #f25622;
   --accent-blue: #1566c0;
+}
+
+/* Kinetic Academy Palette (Primary #0088CC, Secondary #00A651, Tertiary #F25622, Neutral #1A1C1E) */
+html.kinetic, :root.kinetic {
+  --bg-main: #0c1014;
+  --bg-surface: #14181d;
+  --bg-card: #1a1c1e;
+  --bg-subtle: #22262b;
+  --border-color: #2a313a;
+  --border-hover: #0088cc;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-heading: #ffffff;
+  --accent-primary: #0088cc;
+  --accent-secondary: #00a651;
+  --accent-tertiary: #f25622;
+  --accent-neutral: #1a1c1e;
+  --accent-blue: #0088cc;
 }
 
 @layer base {
