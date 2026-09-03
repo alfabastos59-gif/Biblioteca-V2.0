@@ -1,7 +1,8 @@
 import React from 'react';
-import { BookOpen, Clock, ShieldCheck, Sparkles } from 'lucide-react';
+import { BookOpen, ShieldCheck, Sparkles, Heart } from 'lucide-react';
 import { Logo } from './Logo';
 import { useTheme } from '../context/ThemeContext';
+import gatinhoQuiterioImg from '../assets/images/gatinho_quiterio_1788399673265.jpg';
 
 interface AboutViewProps {
   onBackToCatalog?: () => void;
@@ -50,16 +51,30 @@ export const AboutView: React.FC<AboutViewProps> = ({ onBackToCatalog }) => {
           </p>
         </div>
 
-        <div className={`border rounded-2xl p-6 ${isDark ? 'bg-[#092032] border-[#163650]' : 'bg-white border-slate-200 shadow-sm'}`}>
-          <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-500 mb-4">
-            <Clock className="w-6 h-6" />
+        <div className={`border rounded-2xl p-6 flex flex-col items-center text-center justify-between transition-all hover:scale-[1.02] shadow-sm ${isDark ? 'bg-[#092032] border-[#163650] hover:border-purple-500/40' : 'bg-white border-slate-200 hover:border-purple-300'}`}>
+          <div className="relative group mb-3">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-3 border-purple-400/70 shadow-lg shadow-purple-500/20 bg-purple-950/40 p-1 flex items-center justify-center">
+              <img
+                src={gatinhoQuiterioImg}
+                alt="Gatinho Quitério - Mascote da Biblioteca"
+                className="w-full h-full object-cover rounded-full transition-transform duration-300 group-hover:scale-110 cursor-pointer"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-600 text-white shadow-md whitespace-nowrap">
+              Mascote Oficial
+            </span>
           </div>
-          <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>Horário de Funcionamento</h3>
-          <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-            Segunda a Sexta-feira: <strong>07:30 às 18:00</strong><br />
-            Sábados letivos: <strong>08:00 às 12:00</strong><br />
-            Espaço de estudos silenciosos e computadores para pesquisa.
-          </p>
+
+          <div className="mt-1">
+            <h3 className={`text-lg font-bold mb-1 flex items-center justify-center gap-1.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <span>Gatinho Quitério</span>
+              <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
+            </h3>
+            <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              Nosso dedicado bibliotecário felino trabalhando duro na organização do acervo e pronto para incentivar a leitura de todos os alunos!
+            </p>
+          </div>
         </div>
 
         <div className={`border rounded-2xl p-6 ${isDark ? 'bg-[#092032] border-[#163650]' : 'bg-white border-slate-200 shadow-sm'}`}>

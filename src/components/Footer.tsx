@@ -117,14 +117,11 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab, onOpenDesignSystem
           {/* Contact / Location */}
           <div>
             <h4 className={`font-bold text-xs uppercase tracking-wider mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              Localização & Contato
+              Localização
             </h4>
-            <p className={`text-xs mb-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+            <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
               Colégio Estadual do Campo Maria Quitéria<br />
-              Pavilhão B - Sala de Leitura 02
-            </p>
-            <p className="text-emerald-500 text-xs font-semibold">
-              biblioteca@escola.com.br
+              Estrada de São José s/n - Distrito de Maria Quitéria
             </p>
           </div>
         </div>
