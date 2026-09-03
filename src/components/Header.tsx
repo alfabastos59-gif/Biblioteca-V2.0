@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   FileText,
   Smartphone,
-  ShieldCheck,
   User,
   Shield,
   LogOut,
@@ -328,20 +327,6 @@ export const Header: React.FC<HeaderProps> = ({
                   <span className="hidden xl:inline text-[11px] font-semibold text-slate-700">Claro</span>
                 </>
               )}
-            </button>
-
-            {/* Design System Guide */}
-            <button
-              id="btn-design-system"
-              onClick={onOpenDesignSystem}
-              title="Guia Visual / Padrão de Design"
-              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
-                isDark
-                  ? 'bg-[#092032] hover:bg-[#133e4a] text-slate-300 hover:text-emerald-400 border-[#163650]'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-emerald-600 border-slate-200'
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4" />
             </button>
 
             {/* User Session Profile / Login Trigger */}

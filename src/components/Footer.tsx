@@ -111,14 +111,6 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab, onOpenDesignSystem
                   Visualização Smartphone
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={onOpenDesignSystem}
-                  className={`hover:text-emerald-500 transition-colors text-left cursor-pointer ${isDark ? 'text-slate-400' : 'text-slate-600'}`}
-                >
-                  Padrão de Design / Cores
-                </button>
-              </li>
             </ul>
           </div>
 
