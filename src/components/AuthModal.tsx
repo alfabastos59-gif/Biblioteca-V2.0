@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Shield, User, Lock, KeyRound, AlertCircle, ArrowRight, X, BookOpen, Check } from 'lucide-react';
 import { Student, UserSession, AdminUser } from '../types';
 import { useTheme } from '../context/ThemeContext';
@@ -32,6 +32,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  // Always reset password and inputs whenever modal is opened or closed or initial mode changes
+  useEffect(() => {
+    if (isOpen) {
+      setAdminPasswordInput('');
+      setShowPassword(false);
+      setErrorMessage('');
+      setStudentCodeInput('');
+      setTab(initialMode);
+      if (adminUsers.length > 0) {
+        setSelectedAdminId((prev) => prev || adminUsers[0].id);
+      }
+    } else {
+      setAdminPasswordInput('');
+      setShowPassword(false);
+      setErrorMessage('');
+      setStudentCodeInput('');
+    }
+  }, [isOpen, initialMode, adminUsers]);
+
+  const handleClose = () => {
+    setAdminPasswordInput('');
+    setStudentCodeInput('');
+    setShowPassword(false);
+    setErrorMessage('');
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   const handleStudentLogin = (e: React.FormEvent) => {
@@ -50,8 +77,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     });
 
     if (found) {
+      setAdminPasswordInput('');
+      setShowPassword(false);
+      setErrorMessage('');
       onLoginSuccess({ role: 'student', student: found });
-      onClose();
+      handleClose();
     } else {
       setErrorMessage(`Código "${inputCode}" não encontrado. Verifique seu código com a biblioteca ou secretaria.`);
     }
@@ -68,6 +98,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     const isUserPin = targetAdmin && targetAdmin.pin && adminPasswordInput === targetAdmin.pin;
 
     if (isMasterPass || isUserPin) {
+      // Clear password immediately on successful login
+      setAdminPasswordInput('');
+      setShowPassword(false);
+      setErrorMessage('');
+
       onLoginSuccess({
         role: 'admin',
         admin: targetAdmin || {
@@ -81,17 +116,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           createdAt: '15/02/2026',
         },
       });
-      onClose();
+      handleClose();
     } else {
       setErrorMessage('Senha / PIN de Administrador incorreto. Digite a senha do usuário selecionado ou a senha mestra adm123.');
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className={`relative w-full max-w-md border rounded-2xl shadow-2xl overflow-hidden ${
-        isDark ? 'bg-[#001424] border-[#163e5e]' : 'bg-white border-slate-200'
-      }`}>
+    <div
+      onClick={handleClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`relative w-full max-w-md border rounded-2xl shadow-2xl overflow-hidden ${
+          isDark ? 'bg-[#001424] border-[#163e5e]' : 'bg-white border-slate-200'
+        }`}
+      >
         {/* Header decoration */}
         <div className={`relative p-6 pb-5 border-b ${
           isDark
@@ -99,7 +140,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             : 'bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 border-slate-200'
         }`}>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className={`absolute top-4 right-4 p-1.5 rounded-lg transition-colors cursor-pointer ${
               isDark ? 'text-slate-400 hover:text-white hover:bg-white/10' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200'
             }`}
@@ -133,6 +174,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="button"
               onClick={() => {
                 setTab('student');
+                setAdminPasswordInput('');
+                setShowPassword(false);
                 setErrorMessage('');
               }}
               className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
@@ -148,6 +191,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="button"
               onClick={() => {
                 setTab('admin');
+                setAdminPasswordInput('');
+                setShowPassword(false);
                 setErrorMessage('');
               }}
               className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
@@ -172,7 +217,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           )}
 
           {tab === 'student' ? (
-            <form onSubmit={handleStudentLogin} className="space-y-4">
+            <form onSubmit={handleStudentLogin} autoComplete="off" className="space-y-4">
               <div>
                 <label className={`block text-xs font-medium mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   Código do Aluno
@@ -187,6 +232,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     onChange={(e) => setStudentCodeInput(e.target.value)}
                     placeholder="Digite seu código (ex: GUS-0001)"
                     autoFocus
+                    autoComplete="off"
                     className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm font-mono uppercase focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 ${
                       isDark
                         ? 'bg-[#071828] border-[#163e5e] text-white placeholder-slate-500'
@@ -209,7 +255,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </button>
             </form>
           ) : (
-            <form onSubmit={handleAdminLogin} className="space-y-4">
+            <form onSubmit={handleAdminLogin} autoComplete="off" className="space-y-4">
               {/* Select Admin Profile with Avatars */}
               {adminUsers.length > 0 && (
                 <div>
@@ -225,6 +271,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                           type="button"
                           onClick={() => {
                             setSelectedAdminId(adm.id);
+                            setAdminPasswordInput('');
+                            setShowPassword(false);
                             setErrorMessage('');
                           }}
                           className={`p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
@@ -271,11 +319,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     <Lock className="w-4 h-4" />
                   </div>
                   <input
+                    id="admin-password-input"
                     type={showPassword ? 'text' : 'password'}
                     value={adminPasswordInput}
                     onChange={(e) => setAdminPasswordInput(e.target.value)}
                     placeholder="Digite seu PIN ou senha (ex: adm123)"
                     autoFocus
+                    autoComplete="new-password"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    name="admin_pass_pin"
                     className={`w-full pl-10 pr-20 py-2.5 rounded-xl border text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 ${
                       isDark
                         ? 'bg-[#071828] border-[#163650] text-white placeholder-slate-500'

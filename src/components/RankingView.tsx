@@ -570,11 +570,6 @@ export const RankingView: React.FC<RankingViewProps> = ({
                             />
                             <div>
                               <span className="font-bold block text-slate-100">{st.name}</span>
-                              {st.studentCode && (
-                                <span className={`text-[10px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                                  {st.studentCode}
-                                </span>
-                              )}
                             </div>
                           </div>
                         </td>

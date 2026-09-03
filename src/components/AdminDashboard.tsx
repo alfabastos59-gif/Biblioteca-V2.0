@@ -33,7 +33,8 @@ import {
   Award,
   ShieldCheck,
   Shield,
-  CreditCard
+  CreditCard,
+  Smartphone
 } from 'lucide-react';
 import { Book, Loan, Student, Suggestion, AdminSection, ActiveTab, AdminUser, AuditLog } from '../types';
 import { Logo } from './Logo';
@@ -80,6 +81,7 @@ interface AdminDashboardProps {
   onReturnLoan?: (loanId: string) => void;
   onRenewLoan?: (loanId: string) => void;
   setActiveTab: (tab: ActiveTab) => void;
+  onLogout?: () => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -108,6 +110,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onReturnLoan,
   onRenewLoan,
   setActiveTab,
+  onLogout,
 }) => {
   const { isDark } = useTheme();
   const [adminSection, setAdminSection] = useState<AdminSection>('dashboard');
@@ -271,6 +274,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               { id: 'usuarios_adm', label: 'Usuários ADM', icon: ShieldCheck },
               { id: 'auditoria', label: 'Histórico & Auditoria', icon: History },
               { id: 'relatorios', label: 'Relatórios', icon: FileText },
+              { id: 'mobile_view', label: 'Simulador Mobile', icon: Smartphone },
               { id: 'backup', label: 'Backup & Restauração', icon: Database },
               { id: 'configuracoes', label: 'Configurações', icon: Settings },
             ].map((item) => {
@@ -283,6 +287,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   onClick={() => {
                     if (item.id === 'relatorios') {
                       setActiveTab('relatorios');
+                    } else if (item.id === 'mobile_view') {
+                      setActiveTab('mobile_view');
                     } else if (item.id === 'carteirinhas') {
                       setStudentForCard(null);
                       setIsStudentCardModalOpen(true);
@@ -310,7 +316,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className={`pt-6 border-t mt-6 ${isDark ? 'border-[#163650]/60' : 'border-slate-200'}`}>
           <button
             id="btn-admin-sair"
-            onClick={() => setActiveTab('inicio')}
+            onClick={() => {
+              if (onLogout) {
+                onLogout();
+              } else {
+                setActiveTab('inicio');
+              }
+            }}
             className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
               isDark
                 ? 'text-slate-400 hover:text-rose-400 hover:bg-[#092032]'
@@ -393,6 +405,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </button>
             )}
 
+            {/* Quick Reports Button */}
+            <button
+              onClick={() => setActiveTab('relatorios')}
+              title="Ver Relatórios Estatísticos"
+              className={`hidden md:inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                isDark
+                  ? 'bg-[#092032] hover:bg-[#163650] text-emerald-400 border-[#163650]'
+                  : 'bg-white hover:bg-slate-50 text-emerald-700 border-slate-200 shadow-sm'
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Relatórios</span>
+            </button>
+
+            {/* Quick Mobile Simulator Button */}
+            <button
+              onClick={() => setActiveTab('mobile_view')}
+              title="Abrir Simulador Mobile"
+              className={`hidden lg:inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                isDark
+                  ? 'bg-[#092032] hover:bg-[#163650] text-blue-400 border-[#163650]'
+                  : 'bg-white hover:bg-slate-50 text-blue-700 border-slate-200 shadow-sm'
+              }`}
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Mobile</span>
+            </button>
+
             {/* Quick Backup Button */}
             {adminSection !== 'backup' && (
               <button
@@ -430,6 +470,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 className="w-9 h-9 rounded-xl object-cover border border-emerald-500/40 bg-slate-900"
               />
             </div>
+
+            {/* Quick Logout Button */}
+            {onLogout && (
+              <button
+                id="btn-admin-header-logout"
+                onClick={onLogout}
+                title="Encerrar sessão e sair do Painel ADM"
+                className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                  isDark
+                    ? 'bg-[#092032] hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border-[#163650]'
+                    : 'bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 border-slate-200 shadow-sm'
+                }`}
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 

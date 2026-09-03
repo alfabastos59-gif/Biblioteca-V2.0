@@ -207,11 +207,6 @@ export const HomeRankingWidget: React.FC<HomeRankingWidgetProps> = ({
                       <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
                       <span>Turma: <strong>{topStudent.class}</strong></span>
                     </span>
-                    {topStudent.studentCode && (
-                      <span className={`text-[11px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                        Cód: {topStudent.studentCode}
-                      </span>
-                    )}
                   </div>
 
                   {/* Highlights Metric */}

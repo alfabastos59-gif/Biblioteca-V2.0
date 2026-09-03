@@ -115,6 +115,7 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'student' | 'admin'>('student');
   const [authTargetFeature, setAuthTargetFeature] = useState<string>('');
+  const [authModalKey, setAuthModalKey] = useState(0);
 
   // UI state
   const [activeTab, setActiveTab] = useState<ActiveTab>('inicio');
@@ -190,6 +191,7 @@ export default function App() {
   const handleOpenLogin = (mode: 'student' | 'admin' = 'student', featureName: string = '') => {
     setAuthModalMode(mode);
     setAuthTargetFeature(featureName);
+    setAuthModalKey((k) => k + 1);
     setIsAuthModalOpen(true);
   };
 
@@ -227,8 +229,11 @@ export default function App() {
         session.admin.name
       );
     }
+    localStorage.removeItem('bmq_auth_session');
     setSession({ role: 'guest' });
     setActiveTab('inicio');
+    setIsAuthModalOpen(false);
+    setAuthModalKey((k) => k + 1);
   };
 
   // Safe Navigation Handler with Security Checks
@@ -797,6 +802,7 @@ export default function App() {
             onDeleteSuggestion={handleDeleteSuggestion}
             onUpdateSuggestionStatus={handleUpdateSuggestionStatus}
             setActiveTab={handleNavigateTab}
+            onLogout={handleLogout}
           />
         )}
 
@@ -817,6 +823,7 @@ export default function App() {
 
       {/* Authentication Modal */}
       <AuthModal
+        key={authModalKey}
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         students={students}

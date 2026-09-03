@@ -9,7 +9,6 @@ import {
   Shield,
   LogOut,
   BookMarked,
-  Lock,
   Sun,
   Moon,
   Trophy,
@@ -42,34 +41,10 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const { theme, toggleTheme, setTheme, isDark, isKinetic, isClassicDark, isLight } = useTheme();
+  const { toggleTheme, setTheme, isDark, isKinetic, isClassicDark, isLight } = useTheme();
 
   const isStudent = session.role === 'student';
   const isAdmin = session.role === 'admin';
-
-  const handleAdminClick = () => {
-    if (isAdmin) {
-      setActiveTab('admin');
-    } else {
-      onOpenLogin('admin', 'Painel Administrativo (ADM)');
-    }
-  };
-
-  const handleReportsClick = () => {
-    if (isAdmin) {
-      setActiveTab('relatorios');
-    } else {
-      onOpenLogin('admin', 'Relatórios Administrativos');
-    }
-  };
-
-  const handleStudentHistoryClick = () => {
-    if (isStudent) {
-      setActiveTab('meu_historico');
-    } else {
-      onOpenLogin('student', 'Meu Histórico de Empréstimos');
-    }
-  };
 
   return (
     <header
@@ -225,77 +200,8 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </nav>
 
-          {/* Quick View Switches, Theme Toggle & User Session */}
+          {/* Theme Toggle & User Session */}
           <div className="hidden lg:flex items-center gap-2.5">
-            {/* View Switcher Pills */}
-            <div
-              className={`flex items-center p-1 rounded-xl border ${
-                isKinetic
-                  ? 'bg-[#1a1c1e] border-[#2a313a]'
-                  : isDark
-                  ? 'bg-[#071828] border-[#163650]'
-                  : 'bg-slate-100 border-slate-200'
-              }`}
-            >
-              <button
-                id="btn-switch-admin"
-                onClick={handleAdminClick}
-                title={isAdmin ? 'Painel Administrativo' : 'Acesso Restrito ao Administrador'}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
-                  activeTab === 'admin'
-                    ? isDark
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm font-bold'
-                      : 'bg-amber-100 text-amber-900 border border-amber-300 shadow-sm font-bold'
-                    : isDark
-                    ? 'text-slate-400 hover:text-slate-200'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {isAdmin ? <LayoutDashboard className="w-3.5 h-3.5 text-amber-500" /> : <Lock className="w-3.5 h-3.5 text-amber-500" />}
-                <span>Admin</span>
-              </button>
-
-              <button
-                id="btn-switch-relatorios"
-                onClick={handleReportsClick}
-                title={isAdmin ? 'Relatórios Gerais da Biblioteca' : 'Acesso Restrito ao Administrador'}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
-                  activeTab === 'relatorios'
-                    ? isKinetic
-                      ? 'bg-[#0088cc]/20 text-[#0088cc] border border-[#0088cc]/40 shadow-sm font-bold'
-                      : isDark
-                      ? 'bg-[#133e4a] text-emerald-400 border border-emerald-500/40 shadow-sm font-bold'
-                      : 'bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm font-bold'
-                    : isDark
-                    ? 'text-slate-400 hover:text-slate-200'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5" />
-                <span>Relatórios</span>
-              </button>
-
-              <button
-                id="btn-switch-mobile"
-                onClick={() => setActiveTab('mobile_view')}
-                title="Abrir Simulador Mobile"
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
-                  activeTab === 'mobile_view'
-                    ? isKinetic
-                      ? 'bg-[#0088cc]/20 text-[#0088cc] border border-[#0088cc]/40 shadow-sm font-bold'
-                      : isDark
-                      ? 'bg-[#133e4a] text-emerald-400 border border-emerald-500/40 shadow-sm'
-                      : 'bg-blue-100 text-blue-800 border border-blue-300 shadow-sm font-bold'
-                    : isDark
-                    ? 'text-slate-400 hover:text-slate-200'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Smartphone className="w-3.5 h-3.5" />
-                <span>Mobile</span>
-              </button>
-            </div>
-
             {/* THEME TOGGLE SWITCH (DARK / LIGHT / KINETIC) */}
             <button
               id="btn-toggle-theme"
@@ -332,16 +238,21 @@ export const Header: React.FC<HeaderProps> = ({
             {/* User Session Profile / Login Trigger */}
             {isAdmin ? (
               <div className="flex items-center gap-2 pl-1">
-                <div
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold ${
-                    isDark
-                      ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-                      : 'bg-amber-100 border-amber-300 text-amber-900'
+                <button
+                  id="btn-header-go-admin"
+                  onClick={() => setActiveTab('admin')}
+                  title="Abrir Painel Administrativo"
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === 'admin'
+                      ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-sm'
+                      : isDark
+                      ? 'bg-amber-500/15 hover:bg-amber-500/25 border-amber-500/40 text-amber-300'
+                      : 'bg-amber-100 hover:bg-amber-200 border-amber-300 text-amber-900'
                   }`}
                 >
                   <Shield className="w-3.5 h-3.5 text-amber-500" />
-                  <span>ADM Ativo</span>
-                </div>
+                  <span>Painel ADM</span>
+                </button>
                 <button
                   onClick={onLogout}
                   title="Sair do Modo Administrador"
@@ -648,44 +559,46 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </div>
 
-          <div className={`border-t pt-3 flex flex-col gap-2 ${isDark ? 'border-[#163650]' : 'border-slate-200'}`}>
-            <button
-              onClick={() => {
-                handleAdminClick();
-                setMobileMenuOpen(false);
-              }}
-              className={`flex items-center gap-2 p-2.5 rounded-xl text-sm font-medium ${
-                isDark ? 'bg-[#092032] text-amber-300' : 'bg-amber-50 text-amber-900 border border-amber-200'
-              }`}
-            >
-              <LayoutDashboard className="w-4 h-4 text-amber-500" />
-              <span>Painel Administrativo {isAdmin ? '(Liberado)' : '(Requer Senha)'}</span>
-            </button>
-            <button
-              onClick={() => {
-                handleReportsClick();
-                setMobileMenuOpen(false);
-              }}
-              className={`flex items-center gap-2 p-2.5 rounded-xl text-sm font-medium ${
-                isDark ? 'bg-[#092032] text-emerald-400' : 'bg-emerald-50 text-emerald-900 border border-emerald-200'
-              }`}
-            >
-              <FileText className="w-4 h-4 text-emerald-600" />
-              <span>Relatórios Estatísticos</span>
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('mobile_view');
-                setMobileMenuOpen(false);
-              }}
-              className={`flex items-center gap-2 p-2.5 rounded-xl text-sm font-medium ${
-                isDark ? 'bg-[#092032] text-blue-400' : 'bg-blue-50 text-blue-900 border border-blue-200'
-              }`}
-            >
-              <Smartphone className="w-4 h-4 text-blue-600" />
-              <span>Simulador Mobile</span>
-            </button>
-          </div>
+          {isAdmin && (
+            <div className={`border-t pt-3 flex flex-col gap-2 ${isDark ? 'border-[#163650]' : 'border-slate-200'}`}>
+              <button
+                onClick={() => {
+                  setActiveTab('admin');
+                  setMobileMenuOpen(false);
+                }}
+                className={`flex items-center gap-2 p-2.5 rounded-xl text-sm font-medium ${
+                  isDark ? 'bg-[#092032] text-amber-300' : 'bg-amber-50 text-amber-900 border border-amber-200'
+                }`}
+              >
+                <LayoutDashboard className="w-4 h-4 text-amber-500" />
+                <span>Painel Administrativo</span>
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('relatorios');
+                  setMobileMenuOpen(false);
+                }}
+                className={`flex items-center gap-2 p-2.5 rounded-xl text-sm font-medium ${
+                  isDark ? 'bg-[#092032] text-emerald-400' : 'bg-emerald-50 text-emerald-900 border border-emerald-200'
+                }`}
+              >
+                <FileText className="w-4 h-4 text-emerald-600" />
+                <span>Relatórios Estatísticos</span>
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('mobile_view');
+                  setMobileMenuOpen(false);
+                }}
+                className={`flex items-center gap-2 p-2.5 rounded-xl text-sm font-medium ${
+                  isDark ? 'bg-[#092032] text-blue-400' : 'bg-blue-50 text-blue-900 border border-blue-200'
+                }`}
+              >
+                <Smartphone className="w-4 h-4 text-blue-600" />
+                <span>Simulador Mobile</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </header>
