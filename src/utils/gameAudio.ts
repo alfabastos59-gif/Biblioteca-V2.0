@@ -299,3 +299,43 @@ export const playCelebrationSound = () => {
     // Audio safe fallback
   }
 };
+
+/**
+ * Plays a realistic mechanical camera shutter click sound
+ */
+export const playCameraShutterSound = () => {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const t = ctx.currentTime;
+    
+    // First click (shutter opening)
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(1200, t);
+    osc1.frequency.exponentialRampToValueAtTime(300, t + 0.04);
+    gain1.gain.setValueAtTime(0.3, t);
+    gain1.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(t);
+    osc1.stop(t + 0.04);
+
+    // Second click (shutter closing - 55ms later)
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(900, t + 0.055);
+    osc2.frequency.exponentialRampToValueAtTime(150, t + 0.1);
+    gain2.gain.setValueAtTime(0.35, t + 0.055);
+    gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(t + 0.055);
+    osc2.stop(t + 0.1);
+  } catch {
+    // Fallback safe
+  }
+};
+

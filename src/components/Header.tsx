@@ -16,7 +16,8 @@ import {
   Sparkles,
   Cat,
   BookPlus,
-  Camera
+  Camera,
+  Droplets
 } from 'lucide-react';
 import { ActiveTab, UserSession } from '../types';
 import { Logo } from './Logo';
@@ -46,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const { toggleTheme, setTheme, isDark, isKinetic, isClassicDark, isLight } = useTheme();
+  const { toggleTheme, setTheme, isDark, isKinetic, isClassicDark, isOcean, isLight } = useTheme();
 
   const isStudent = session.role === 'student';
   const isAdmin = session.role === 'admin';
@@ -242,19 +243,19 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Theme Toggle & User Session */}
           <div className="hidden lg:flex items-center gap-2.5">
-            {/* THEME TOGGLE SWITCH (DARK / LIGHT / KINETIC) */}
+            {/* THEME TOGGLE SWITCH (DARK / OCEAN / KINETIC) */}
             <button
               id="btn-toggle-theme"
               onClick={toggleTheme}
               title={`Tema atual: ${
-                isKinetic ? 'Kinetic' : isClassicDark ? 'Escuro' : 'Claro'
-              }. Clique para alternar (Escuro → Claro → Kinetic)`}
+                isKinetic ? 'Kinetic' : isClassicDark ? 'Azul Noturno' : 'Azul Marinho'
+              }. Clique para alternar (Azul Noturno → Azul Marinho → Kinetic)`}
               className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 text-xs font-medium transition-all cursor-pointer ${
                 isKinetic
                   ? 'bg-[#1a1c1e] hover:bg-[#2a313a] text-[#0088cc] border-[#2a313a] shadow-sm'
                   : isClassicDark
-                  ? 'bg-[#092032] hover:bg-[#133e4a] text-amber-300 border-[#163650]'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300 shadow-sm'
+                  ? 'bg-[#092032] hover:bg-[#133e4a] text-emerald-400 border-[#163650]'
+                  : 'bg-[#001f35] hover:bg-[#072a44] text-cyan-300 border-[#164264] shadow-sm'
               }`}
             >
               {isKinetic ? (
@@ -265,12 +266,12 @@ export const Header: React.FC<HeaderProps> = ({
               ) : isClassicDark ? (
                 <>
                   <Moon className="w-4 h-4 text-emerald-400" />
-                  <span className="hidden xl:inline text-[11px] font-semibold text-slate-300">Escuro</span>
+                  <span className="hidden xl:inline text-[11px] font-semibold text-slate-200">Azul Noturno</span>
                 </>
               ) : (
                 <>
-                  <Sun className="w-4 h-4 text-amber-500" />
-                  <span className="hidden xl:inline text-[11px] font-semibold text-slate-700">Claro</span>
+                  <Droplets className="w-4 h-4 text-cyan-400" />
+                  <span className="hidden xl:inline text-[11px] font-semibold text-cyan-200">Azul Marinho</span>
                 </>
               )}
             </button>
@@ -466,9 +467,9 @@ export const Header: React.FC<HeaderProps> = ({
                   ? 'bg-[#0088cc]/20 text-[#0088cc]'
                   : isClassicDark
                   ? 'bg-emerald-500/20 text-emerald-400'
-                  : 'bg-amber-100 text-amber-800'
+                  : 'bg-cyan-500/20 text-cyan-300'
               }`}>
-                {isKinetic ? 'Kinetic' : isClassicDark ? 'Escuro' : 'Claro'}
+                {isKinetic ? 'Kinetic' : isClassicDark ? 'Azul Noturno' : 'Azul Marinho'}
               </span>
             </div>
 
@@ -478,27 +479,23 @@ export const Header: React.FC<HeaderProps> = ({
                 className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 border transition-all cursor-pointer ${
                   isClassicDark
                     ? 'bg-[#092032] text-emerald-400 border-emerald-500/40 shadow-sm'
-                    : isDark
-                    ? 'bg-[#0c141c] text-slate-400 border-[#1e3a5f]/40 hover:text-slate-200'
-                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900'
+                    : 'bg-[#0c141c] text-slate-400 border-[#1e3a5f]/40 hover:text-slate-200'
                 }`}
               >
                 <Moon className="w-3.5 h-3.5" />
-                <span>Escuro</span>
+                <span>Noturno</span>
               </button>
 
               <button
-                onClick={() => setTheme('light')}
+                onClick={() => setTheme('ocean')}
                 className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 border transition-all cursor-pointer ${
-                  isLight
-                    ? 'bg-amber-100 text-amber-900 border-amber-300 shadow-sm'
-                    : isDark
-                    ? 'bg-[#0c141c] text-slate-400 border-[#1e3a5f]/40 hover:text-slate-200'
-                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900'
+                  isOcean
+                    ? 'bg-[#001f35] text-cyan-300 border-cyan-500/40 shadow-sm'
+                    : 'bg-[#0c141c] text-slate-400 border-[#1e3a5f]/40 hover:text-slate-200'
                 }`}
               >
-                <Sun className="w-3.5 h-3.5" />
-                <span>Claro</span>
+                <Droplets className="w-3.5 h-3.5" />
+                <span>Marinho</span>
               </button>
 
               <button
@@ -506,9 +503,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 border transition-all cursor-pointer ${
                   isKinetic
                     ? 'bg-[#0088cc]/20 text-[#0088cc] border-[#0088cc]/50 shadow-sm'
-                    : isDark
-                    ? 'bg-[#0c141c] text-slate-400 border-[#1e3a5f]/40 hover:text-slate-200'
-                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900'
+                    : 'bg-[#0c141c] text-slate-400 border-[#1e3a5f]/40 hover:text-slate-200'
                 }`}
               >
                 <Palette className="w-3.5 h-3.5" />

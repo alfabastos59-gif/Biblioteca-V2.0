@@ -25,6 +25,13 @@ import {
   AlertCircle,
   Check,
   Play,
+  Database,
+  Search,
+  BadgeCheck,
+  BookCheck,
+  ArrowRightLeft,
+  Layers,
+  Bookmark,
 } from 'lucide-react';
 import { Book, Loan, Student, UserSession } from '../types';
 import { useTheme } from '../context/ThemeContext';
@@ -62,12 +69,13 @@ interface MissaoQuiterioViewProps {
 
 // Sample students for quick selection and easy testing on smartphone
 const SAMPLE_STUDENTS = [
-  { code: 'RUA-0004', name: 'Ruan Santos da Silva', class: '1º Ano A' },
-  { code: 'GUS-0001', name: 'Gustavo Santos', class: '1º Ano A' },
-  { code: 'AMI-0002', name: 'Amilton Luan', class: '1º Ano A' },
-  { code: 'KAL-0003', name: 'Kallany Santos', class: '1º Ano A' },
-  { code: 'ANA-0001', name: 'Ana Clara Lima', class: '2º Ano B' },
-  { code: 'VER-0001', name: 'Vera Lúcia Bastos', class: '3º Ano A' },
+  { code: 'VER-0001', name: 'Veronica Gonçalves', class: '1º Ano A', bookTitle: 'Desenganos da vida Humana' },
+  { code: 'RUA-0004', name: 'Ruan Santos da Silva', class: '1º A', bookTitle: 'Poemas Escolhidos' },
+  { code: 'KEM-0008', name: 'Kemilly Santana', class: '2º A', bookTitle: 'Poesias reunidas' },
+  { code: 'KAL-0003', name: 'Kalil Lopes', class: '2º A', bookTitle: 'História e Memória do Município' },
+  { code: 'ELI-0010', name: 'Eliel Bastos', class: '3º A', bookTitle: 'As Melhores Histórias de Fernando Sabino' },
+  { code: 'ADR-0007', name: 'Adrielly', class: '1º B', bookTitle: 'O Cortiço' },
+  { code: 'KAI-0009', name: 'Kailan', class: '1º A', bookTitle: 'Dom Casmurro' },
 ];
 
 // 30 seconds timer per question, exactly as in the reference video
@@ -100,6 +108,11 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
   const [isBadgesModalOpen, setIsBadgesModalOpen] = useState<boolean>(false);
   const [isBookSelectorModalOpen, setIsBookSelectorModalOpen] = useState<boolean>(false);
   const [showSchoolPodiumMobile, setShowSchoolPodiumMobile] = useState<boolean>(false);
+
+  // Book Selector Modal State for matching student loans database
+  const [bookSelectorTab, setBookSelectorTab] = useState<'loans' | 'catalog'>('loans');
+  const [bookSelectorFilter, setBookSelectorFilter] = useState<'all' | 'active'>('all');
+  const [bookSearchQuery, setBookSearchQuery] = useState<string>('');
 
   // Audio mute state
   const [soundOn, setSoundOn] = useState<boolean>(true);
@@ -156,64 +169,86 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
     }
   }, [activeStudent]);
 
-  // Cross-reference books borrowed or returned by this student
+  // Cross-reference books borrowed or returned by this student from the database
   const studentLoans = useMemo(() => {
     if (!activeStudent) return [];
+    const sCode = (activeStudent.studentCode || '').trim().toLowerCase().replace(/^alu-/, '');
+    const sId = (activeStudent.id || '').trim().toLowerCase().replace(/^alu-/, '');
+    const sName = (activeStudent.name || '').trim().toLowerCase();
+    const sEmail = (activeStudent.email || '').trim().toLowerCase();
+
     return loans.filter((l) => {
-      const codeMatch =
-        activeStudent.studentCode &&
-        l.studentCode &&
-        l.studentCode.trim().toLowerCase().replace(/^alu-/, '') ===
-          activeStudent.studentCode.trim().toLowerCase().replace(/^alu-/, '');
-      const nameMatch =
-        activeStudent.name &&
-        l.studentName &&
-        l.studentName.trim().toLowerCase() === activeStudent.name.trim().toLowerCase();
-      const emailMatch =
-        activeStudent.email &&
-        l.studentEmail &&
-        l.studentEmail.trim().toLowerCase() === activeStudent.email.trim().toLowerCase();
-      return codeMatch || nameMatch || emailMatch;
+      const lCode = (l.studentCode || '').trim().toLowerCase().replace(/^alu-/, '');
+      const lName = (l.studentName || '').trim().toLowerCase();
+      const lEmail = (l.studentEmail || '').trim().toLowerCase();
+
+      const codeMatch = (sCode && lCode === sCode) || (sId && lCode === sId);
+      const emailMatch = sEmail && lEmail && sEmail === lEmail;
+      const nameMatch = sName && lName && (sName === lName || sName.includes(lName) || lName.includes(sName));
+
+      return codeMatch || emailMatch || nameMatch;
     });
   }, [activeStudent, loans]);
 
-  // Unique books from student's loans
+  // Active loans (in progress or overdue) and returned loans from database
+  const activeStudentLoans = useMemo(() => {
+    return studentLoans.filter((l) => l.status === 'em_andamento' || l.status === 'atrasado');
+  }, [studentLoans]);
+
+  const returnedStudentLoans = useMemo(() => {
+    return studentLoans.filter((l) => l.status === 'devolvido');
+  }, [studentLoans]);
+
+  // Unique books from student's loans, sorted by active/overdue loans first
   const studentBooks = useMemo(() => {
     const map = new Map<string, { book: Book; loan: Loan }>();
     studentLoans.forEach((loan) => {
       const matchedBook =
         books.find((b) => b.id === loan.bookId) ||
-        books.find((b) => b.title.toLowerCase() === loan.bookTitle.toLowerCase()) || {
-          id: loan.bookId,
+        books.find((b) => b.title.trim().toLowerCase() === loan.bookTitle.trim().toLowerCase()) || {
+          id: loan.bookId || `loan_${loan.id}`,
           title: loan.bookTitle,
           author: loan.bookAuthor,
-          cover: loan.bookCover,
+          cover: loan.bookCover || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&auto=format&fit=crop&q=80',
           category: 'Literatura',
           rating: 5,
           reviewsCount: 1,
           status: 'disponivel',
           pages: 100,
           year: 2026,
-          publisher: 'Biblioteca',
+          publisher: 'Biblioteca Maria Quitéria',
           location: 'Geral',
-          synopsis: `Obra emprestada por ${loan.studentName}.`,
-          isbn: '000',
+          synopsis: `Obra emprestada para o aluno ${loan.studentName}.`,
+          isbn: '000-0000000000',
           totalCopies: 1,
           availableCopies: 1,
         };
 
-      if (!map.has(matchedBook.title.toLowerCase())) {
-        map.set(matchedBook.title.toLowerCase(), { book: matchedBook, loan });
+      const key = (loan.bookId || matchedBook.id || loan.bookTitle).trim().toLowerCase();
+      if (!map.has(key)) {
+        map.set(key, { book: matchedBook, loan });
       }
     });
-    return Array.from(map.values());
+
+    const list = Array.from(map.values());
+    list.sort((a, b) => {
+      const priority = { atrasado: 0, em_andamento: 1, devolvido: 2 };
+      return (priority[a.loan.status] ?? 3) - (priority[b.loan.status] ?? 3);
+    });
+    return list;
   }, [studentLoans, books]);
 
-  // Default book for quiz: Prioritize "O Pequeno Príncipe" (exact from video)
+  // Default book for quiz: Strictly prioritize the student's borrowed book from the database!
   const defaultBook = useMemo(() => {
+    if (studentBooks.length > 0) {
+      const activeOrOverdue = studentBooks.find(
+        (sb) => sb.loan.status === 'em_andamento' || sb.loan.status === 'atrasado'
+      );
+      if (activeOrOverdue) return activeOrOverdue.book;
+      return studentBooks[0].book;
+    }
     const opp = books.find((b) => b.title.toLowerCase().includes('pequeno príncipe'));
     if (opp) return opp;
-    if (studentBooks.length > 0) return studentBooks[0].book;
     return (
       books[0] || {
         id: 'default_book',
@@ -238,12 +273,34 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
 
   const [selectedBookForQuiz, setSelectedBookForQuiz] = useState<Book>(defaultBook);
 
-  // Sync selected book when student books change
+  // Automatically synchronize selected book with student loans from database
   useEffect(() => {
-    if (studentBooks.length > 0 && selectedBookForQuiz.id === 'default_book') {
-      setSelectedBookForQuiz(studentBooks[0].book);
+    if (activeStudent && studentBooks.length > 0) {
+      const isAlreadyInLoans = studentBooks.some(
+        (sb) =>
+          sb.book.id === selectedBookForQuiz.id ||
+          sb.book.title.trim().toLowerCase() === selectedBookForQuiz.title.trim().toLowerCase()
+      );
+      if (!isAlreadyInLoans || selectedBookForQuiz.id === 'default_book') {
+        const activeOrOverdue = studentBooks.find(
+          (sb) => sb.loan.status === 'em_andamento' || sb.loan.status === 'atrasado'
+        );
+        const bookToUse = activeOrOverdue ? activeOrOverdue.book : studentBooks[0].book;
+        setSelectedBookForQuiz(bookToUse);
+      }
     }
-  }, [studentBooks, selectedBookForQuiz.id]);
+  }, [activeStudent, studentBooks]);
+
+  // Check if current selected quiz book matches an active/past loan of this student in the database
+  const currentMatchedLoan = useMemo(() => {
+    if (!activeStudent || !selectedBookForQuiz) return null;
+    const match = studentBooks.find(
+      (sb) =>
+        sb.book.id === selectedBookForQuiz.id ||
+        sb.book.title.trim().toLowerCase() === selectedBookForQuiz.title.trim().toLowerCase()
+    );
+    return match ? match.loan : null;
+  }, [activeStudent, selectedBookForQuiz, studentBooks]);
 
   // Current Question Set
   const currentQuestions: QuizQuestion[] = useMemo(() => {
@@ -271,11 +328,19 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
   );
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoAdvanceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const currentQuestionIndexRef = useRef<number>(0);
+  const roundStatsRef = useRef({ correct: 0, pointsEarned: 0 });
 
   const activeQuestion: QuizQuestion | undefined = currentQuestions[currentQuestionIndex];
 
   // Reset question state
   const startQuestion = (idx: number, activateTimer = true) => {
+    if (autoAdvanceTimeoutRef.current) {
+      clearTimeout(autoAdvanceTimeoutRef.current);
+      autoAdvanceTimeoutRef.current = null;
+    }
+    currentQuestionIndexRef.current = idx;
     setCurrentQuestionIndex(idx);
     setSelectedOption(null);
     setIsAnswered(false);
@@ -340,21 +405,40 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current);
     };
   }, [isTimerActive, isAnswered, roundCompleted, soundOn]);
 
   const handleTimeUp = () => {
+    if (autoAdvanceTimeoutRef.current) {
+      clearTimeout(autoAdvanceTimeoutRef.current);
+      autoAdvanceTimeoutRef.current = null;
+    }
     setIsAnswered(true);
     setIsCorrect(false);
     setIsTimerActive(false);
     setMascotMood('thinking');
     setSpeechBubbleText('O tempo acabou! Mas não desanime, o aprendizado continua! 🐾');
     if (soundOn) playWrongSound();
+
+    // Pula para a próxima pergunta automaticamente após o tempo acabar
+    autoAdvanceTimeoutRef.current = setTimeout(() => {
+      handleNextQuestion();
+    }, 550);
   };
 
   // Handle Option Click
   const handleSelectOption = (index: number) => {
-    if (isAnswered || !activeQuestion) return;
+    if (isAnswered) {
+      handleNextQuestion();
+      return;
+    }
+    if (!activeQuestion) return;
+
+    if (autoAdvanceTimeoutRef.current) {
+      clearTimeout(autoAdvanceTimeoutRef.current);
+      autoAdvanceTimeoutRef.current = null;
+    }
 
     setIsAnswered(true);
     setIsTimerActive(false);
@@ -372,7 +456,6 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
       setFloatingScore(totalPoints);
       setMascotMood('celebrating');
       setIsMeowing(true);
-      // Exact praise from user video
       setSpeechBubbleText('Miau!! 🐾 Você mandou bem! Continua lendo e acertando as perguntas!');
 
       if (soundOn) {
@@ -394,6 +477,10 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
         // Confetti fallback
       }
 
+      roundStatsRef.current.correct += 1;
+      roundStatsRef.current.pointsEarned += totalPoints;
+      setRoundStats({ ...roundStatsRef.current });
+
       // Persist score & update leaderboard
       const { updatedData } = addGamePoints(
         studentKey,
@@ -406,10 +493,6 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
       );
       setGameData(updatedData);
       setLeaderboard(getTopSchoolRanking(activeStudent?.studentCode));
-      setRoundStats((prev) => ({
-        correct: prev.correct + 1,
-        pointsEarned: prev.pointsEarned + totalPoints,
-      }));
     } else {
       setMascotMood('thinking');
       setIsMeowing(false);
@@ -429,12 +512,22 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
       setGameData(updatedData);
       setLeaderboard(getTopSchoolRanking(activeStudent?.studentCode));
     }
+
+    // Pula para a próxima pergunta automaticamente de forma rápida (450ms) tanto se acertar quanto se errar
+    autoAdvanceTimeoutRef.current = setTimeout(() => {
+      handleNextQuestion();
+    }, 450);
   };
 
   // Next Question or Complete with 5-attempt limit tracking
   const handleNextQuestion = () => {
-    if (currentQuestionIndex < currentQuestions.length - 1) {
-      startQuestion(currentQuestionIndex + 1, true);
+    if (autoAdvanceTimeoutRef.current) {
+      clearTimeout(autoAdvanceTimeoutRef.current);
+      autoAdvanceTimeoutRef.current = null;
+    }
+    const nextIdx = currentQuestionIndexRef.current + 1;
+    if (nextIdx < currentQuestions.length) {
+      startQuestion(nextIdx, true);
     } else {
       const studentKey = activeStudent?.studentCode || activeStudent?.id || 'aluno_anonimo';
       const studentName = activeStudent?.name || 'Leitor Apaixonado';
@@ -446,8 +539,8 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
         selectedBookForQuiz.title,
         selectedBookForQuiz.author,
         selectedBookForQuiz.cover,
-        roundStats.pointsEarned,
-        roundStats.correct,
+        roundStatsRef.current.pointsEarned,
+        roundStatsRef.current.correct,
         currentQuestions.length
       );
 
@@ -484,6 +577,7 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
       );
       return;
     }
+    roundStatsRef.current = { correct: 0, pointsEarned: 0 };
     setRoundCompleted(false);
     setRoundStats({ correct: 0, pointsEarned: 0 });
     setShowBookScoresView(false);
@@ -493,7 +587,7 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
     setSpeechBubbleText('Miau! Pronto para uma nova rodada? Clique em Jogar para iniciar o tempo! 🐾');
   };
 
-  const handleSelectBookForQuiz = (book: Book) => {
+  const handleSelectBookForQuiz = (book: Book, isFromLoans: boolean = false) => {
     setIsBookSelectorModalOpen(false);
     if ((gameData.attemptsCount || 0) >= MAX_QUIZ_ATTEMPTS) {
       setShowBookScoresView(true);
@@ -503,6 +597,7 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
       );
       return;
     }
+    roundStatsRef.current = { correct: 0, pointsEarned: 0 };
     setSelectedBookForQuiz(book);
     setRoundCompleted(false);
     setRoundStats({ correct: 0, pointsEarned: 0 });
@@ -510,7 +605,11 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
     setIsGameStarted(false);
     startQuestion(0, false);
     setMascotMood('talking');
-    setSpeechBubbleText(`Miau! Livro "${book.title}" selecionado! Clique em Jogar para iniciar o tempo! 🐾`);
+    if (isFromLoans) {
+      setSpeechBubbleText(`Miau! Livro "${book.title}" sincronizado com o seu empréstimo no banco de dados! Clique em Jogar para iniciar o tempo! 🐾`);
+    } else {
+      setSpeechBubbleText(`Miau! Livro "${book.title}" selecionado para o desafio! Clique em Jogar para iniciar o tempo! 🐾`);
+    }
   };
 
   // Student Identification Modal handler with code verification and sample student support
@@ -582,6 +681,60 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
     setIsTimerActive(true);
     setTimeLeft(QUESTION_TIMER_SECONDS);
 
+    // Synchronize loan books from the student database
+    const matchedLoans = loans.filter((l) => {
+      const sCode = (foundStudent!.studentCode || '').trim().toLowerCase().replace(/^alu-/, '');
+      const sId = (foundStudent!.id || '').trim().toLowerCase().replace(/^alu-/, '');
+      const sName = (foundStudent!.name || '').trim().toLowerCase();
+      const sEmail = (foundStudent!.email || '').trim().toLowerCase();
+
+      const lCode = (l.studentCode || '').trim().toLowerCase().replace(/^alu-/, '');
+      const lName = (l.studentName || '').trim().toLowerCase();
+      const lEmail = (l.studentEmail || '').trim().toLowerCase();
+
+      const codeMatch = (sCode && lCode === sCode) || (sId && lCode === sId);
+      const emailMatch = sEmail && lEmail && sEmail === lEmail;
+      const nameMatch = sName && lName && (sName === lName || sName.includes(lName) || lName.includes(sName));
+
+      return codeMatch || emailMatch || nameMatch;
+    });
+
+    if (matchedLoans.length > 0) {
+      const activeOrOverdue = matchedLoans.find(
+        (l) => l.status === 'em_andamento' || l.status === 'atrasado'
+      ) || matchedLoans[0];
+
+      const foundBook =
+        books.find((b) => b.id === activeOrOverdue.bookId) ||
+        books.find((b) => b.title.trim().toLowerCase() === activeOrOverdue.bookTitle.trim().toLowerCase()) || {
+          id: activeOrOverdue.bookId || `loan_${activeOrOverdue.id}`,
+          title: activeOrOverdue.bookTitle,
+          author: activeOrOverdue.bookAuthor,
+          cover: activeOrOverdue.bookCover || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&auto=format&fit=crop&q=80',
+          category: 'Literatura',
+          rating: 5,
+          reviewsCount: 1,
+          status: 'disponivel',
+          pages: 100,
+          year: 2026,
+          publisher: 'Biblioteca Maria Quitéria',
+          location: 'Geral',
+          synopsis: `Obra do empréstimo de ${activeOrOverdue.studentName}.`,
+          isbn: '000-0000000000',
+          totalCopies: 1,
+          availableCopies: 1,
+        };
+
+      setSelectedBookForQuiz(foundBook);
+      setSpeechBubbleText(
+        `Miau! Olá ${foundStudent.name}! Identifiquei seu empréstimo do livro "${foundBook.title}" no banco de dados! Clique em Jogar para iniciar! 🐾`
+      );
+    } else {
+      setSpeechBubbleText(
+        `Miau! Olá ${foundStudent.name}! Não encontramos empréstimos ativos no banco de dados, mas você pode praticar o Quiz com os livros do acervo! 🐾`
+      );
+    }
+
     const existingData = getStudentGameData(
       foundStudent.studentCode || foundStudent.id,
       foundStudent.name
@@ -626,13 +779,13 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
     <div
       className={`min-h-[calc(100vh-80px)] py-4 px-3 sm:px-6 relative overflow-hidden transition-colors ${
         isDark
-          ? 'bg-gradient-to-b from-[#0b102b] via-[#10133a] to-[#0a0e27] text-slate-100'
-          : 'bg-gradient-to-b from-[#181a4a] via-[#1a1e54] to-[#121438] text-white'
+          ? 'bg-gradient-to-b from-[#0d0520] via-[#160a36] to-[#0a0319] text-slate-100'
+          : 'bg-gradient-to-b from-[#0d0520] via-[#160a36] to-[#0a0319] text-white'
       }`}
     >
       {/* Background Soft Stars Atmosphere with Floating Twinkling Lights */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-25 bg-[radial-gradient(#fbbf24_1px,transparent_1px)] [background-size:32px_32px]"
+        className="absolute inset-0 pointer-events-none opacity-35 bg-[radial-gradient(#f59e0b_1.2px,transparent_1.2px)] [background-size:24px_24px]"
         aria-hidden="true"
       />
       {[
@@ -730,14 +883,14 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
 
         {/* --- MOBILE VIEW: Compact Single Bar with 0 overflow and ~70px height --- */}
         <div className="md:hidden flex flex-col gap-2">
-          <div className="p-2.5 sm:p-3 rounded-2xl border-2 border-amber-400 border-b-4 border-amber-600 bg-gradient-to-br from-[#2a1758]/95 via-[#3b1d75]/95 to-[#221047]/95 backdrop-blur-md shadow-[0_3px_0_#b45309]">
+          <div className="p-2.5 sm:p-3 rounded-2xl border-3 border-[#ea580c] border-b-[5px] border-[#9a3412] bg-[#2e1065] shadow-[0_4px_0_#7c2d12]">
             <div className="flex items-center justify-between gap-2">
               {/* Mascot Mini Portrait + Student Identification */}
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 <div
                   onClick={() => setIsCodeModalOpen(true)}
                   title="Trocar aluno / Digitar código"
-                  className="w-10 h-10 rounded-full border-2 border-amber-300 border-b-2 border-amber-600 bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center overflow-hidden flex-shrink-0 cursor-pointer shadow-sm active:scale-95"
+                  className="w-10 h-10 rounded-full border-2 border-amber-300 border-b-2 border-amber-600 bg-[#ea580c] flex items-center justify-center overflow-hidden flex-shrink-0 cursor-pointer shadow-sm active:scale-95"
                 >
                   <QuiterioMascot size="sm" className="scale-60 -mt-2" />
                 </div>
@@ -750,7 +903,7 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsCodeModalOpen(true)}
-                      className="text-[10px] font-extrabold text-amber-300 hover:text-white bg-amber-400/20 px-1.5 py-0.5 rounded border border-amber-400/40 cursor-pointer flex-shrink-0"
+                      className="text-[10px] font-black text-[#facc15] hover:text-white underline cursor-pointer flex-shrink-0"
                     >
                       {activeStudent ? 'Trocar' : 'Código'}
                     </button>
@@ -764,18 +917,18 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
               </div>
 
               {/* Score Pill with Star - Guaranteed NO overflow on smartphone */}
-              <div className="flex items-center gap-1.5 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-amber-950 px-2.5 sm:px-3 py-1 rounded-xl border-2 border-amber-200 border-b-2 border-amber-700 shadow-xs flex-shrink-0">
-                <Star className="w-4 h-4 fill-amber-950 text-amber-950" />
+              <div className="flex items-center gap-1.5 bg-gradient-to-b from-[#ffd200] via-[#ffbe00] to-[#f59e0b] text-[#3b1404] px-3 py-1 rounded-xl border-2 border-amber-200 border-b-2 border-[#b45309] shadow-xs flex-shrink-0">
+                <Star className="w-4 h-4 fill-[#3b1404] text-[#3b1404]" />
                 <span className="text-lg sm:text-xl font-black font-mono tracking-tight">{displayScore}</span>
               </div>
             </div>
 
             {/* Quick action bar for mobile */}
-            <div className="mt-2 pt-1.5 border-t border-white/15 flex items-center justify-between text-[11px]">
+            <div className="mt-2 pt-1.5 border-t border-purple-900/60 flex items-center justify-between text-[11px]">
               <button
                 type="button"
                 onClick={() => setShowSchoolPodiumMobile(!showSchoolPodiumMobile)}
-                className="text-amber-300 hover:text-white font-bold flex items-center gap-1 cursor-pointer"
+                className="text-[#facc15] hover:text-white font-bold flex items-center gap-1 cursor-pointer"
               >
                 <span>🏆 {showSchoolPodiumMobile ? 'Ocultar Pódio' : 'Ver Pódio da Escola'}</span>
               </button>
@@ -799,9 +952,9 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="p-3 rounded-2xl border-2 border-purple-400 border-b-3 border-purple-950 bg-gradient-to-br from-[#2e1065]/95 via-[#3b177d]/95 to-[#1e1b4b]/95 backdrop-blur-md shadow-md text-white space-y-1.5"
+                className="p-3 rounded-2xl border-3 border-[#ea580c] border-b-4 border-[#9a3412] bg-[#2e1065] shadow-md text-white space-y-1.5"
               >
-                <div className="text-xs font-black text-amber-300 uppercase tracking-wider mb-1">
+                <div className="text-xs font-black text-[#facc15] uppercase tracking-wider mb-1">
                   Top 3 Leitores da Escola:
                 </div>
                 {leaderboard.topThree.slice(0, 3).map((item, idx) => {
@@ -809,13 +962,13 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
                   return (
                     <div
                       key={idx}
-                      className="flex items-center justify-between px-2.5 py-1 rounded-lg bg-white/10 text-xs"
+                      className="flex items-center justify-between px-2.5 py-1 rounded-lg bg-[#1e0a3c] border border-purple-900/50 text-xs"
                     >
                       <div className="flex items-center gap-1.5">
                         <span>{medal}</span>
                         <span className="font-bold truncate max-w-[130px]">{item.studentName}</span>
                       </div>
-                      <span className="font-mono font-black text-amber-300">{item.score} pts</span>
+                      <span className="font-mono font-black text-[#facc15]">{item.score} pts</span>
                     </div>
                   );
                 })}
@@ -826,33 +979,33 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
 
         {/* --- DESKTOP VIEW: 2-Column Expanded Cards (Hidden on mobile < md) --- */}
         <div className="hidden md:grid md:grid-cols-2 gap-3 sm:gap-4 items-stretch">
-          {/* Top Left Card: Sua Pontuação (3D Tactile Card with Quitério Colors & Avatar) */}
+          {/* Top Left Card: Sua Pontuação (Matching uploaded image) */}
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className="relative p-3.5 sm:p-4 rounded-2xl border-2 border-amber-400 border-b-4 border-amber-600 bg-gradient-to-br from-[#2a1758]/95 via-[#3b1d75]/95 to-[#221047]/95 backdrop-blur-md shadow-[0_4px_0_#b45309] flex items-center justify-between gap-3"
+            className="relative p-4 sm:p-5 rounded-3xl border-4 border-[#ea580c] border-b-[6px] border-[#9a3412] bg-[#2e1065] shadow-[0_6px_0_#7c2d12,0_10px_25px_rgba(0,0,0,0.5)] flex items-center justify-between gap-4"
           >
-            <div className="flex items-center gap-3">
-              {/* Mascot Mini Portrait in circular gold-bordered frame */}
+            <div className="flex items-center gap-3.5">
+              {/* Mascot Mini Portrait in circular gold-bordered frame with orange background */}
               <div
                 onClick={() => setIsCodeModalOpen(true)}
                 title="Trocar aluno"
-                className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-amber-300 border-b-3 border-amber-600 bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center overflow-hidden shadow-md flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
+                className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-amber-300 border-b-3 border-amber-600 bg-[#ea580c] flex items-center justify-center overflow-hidden shadow-md flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
               >
                 <QuiterioMascot size="sm" className="scale-65 -mt-3" />
               </div>
 
               <div>
-                <span className="text-[11px] sm:text-xs font-black text-amber-300 uppercase tracking-wider block drop-shadow-xs">
+                <span className="text-xs sm:text-sm font-black text-[#facc15] uppercase tracking-wider block drop-shadow-xs">
                   Sua Pontuação
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm sm:text-base font-black text-white truncate max-w-[150px]">
+                  <span className="text-base sm:text-lg font-black text-white truncate max-w-[170px]">
                     {activeStudent ? activeStudent.name : 'Aluno Convidado'}
                   </span>
                   <button
                     onClick={() => setIsCodeModalOpen(true)}
-                    className="text-[10px] font-bold text-amber-300 hover:text-white underline cursor-pointer"
+                    className="text-xs font-black text-[#facc15] hover:text-yellow-200 underline cursor-pointer"
                     title="Trocar Aluno"
                   >
                     Trocar
@@ -860,12 +1013,12 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
                 </div>
 
                 {/* 🐾 Tentativas 5/5 Counter Pill */}
-                <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                <div className="mt-1.5 flex items-center gap-2 flex-wrap">
                   <span
-                    className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-lg border flex items-center gap-1 shadow-xs ${
+                    className={`text-[11px] font-black uppercase px-2.5 py-0.5 rounded-lg border flex items-center gap-1 shadow-inner ${
                       (gameData.attemptsCount || 0) >= MAX_QUIZ_ATTEMPTS
                         ? 'bg-rose-500/30 text-rose-200 border-rose-400/60'
-                        : 'bg-amber-400/20 text-amber-300 border-amber-400/40'
+                        : 'bg-[#1e0a3c] text-[#facc15] border-purple-900/60'
                     }`}
                   >
                     <span>🐾</span>
@@ -877,13 +1030,13 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
 
                   {/* 5 mini paws */}
                   <div
-                    className="flex items-center gap-0.5 bg-black/30 px-1.5 py-0.5 rounded-md border border-white/10"
+                    className="flex items-center gap-1 bg-[#16062c] px-2 py-0.5 rounded-lg border border-purple-900/50"
                     title={`${gameData.attemptsCount || 0} de ${MAX_QUIZ_ATTEMPTS} tentativas utilizadas`}
                   >
                     {[1, 2, 3, 4, 5].map((num) => (
                       <span
                         key={num}
-                        className={`text-[10px] transition-all ${
+                        className={`text-xs transition-all ${
                           num <= (gameData.attemptsCount || 0)
                             ? 'opacity-100 scale-105'
                             : 'opacity-25 grayscale'
@@ -898,7 +1051,7 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowBookScoresView(true)}
-                    className="text-[10px] font-bold text-amber-200 hover:text-white underline cursor-pointer"
+                    className="text-xs font-bold text-white hover:text-[#facc15] underline cursor-pointer ml-1"
                   >
                     Ver por livro
                   </button>
@@ -906,32 +1059,32 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
               </div>
             </div>
 
-            {/* Score Big Display with 3D Golden Star Pill */}
-            <div className="flex items-center gap-2 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-amber-950 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl border-2 border-amber-200 border-b-3 border-amber-700 shadow-[0_3px_0_#b45309] flex-shrink-0">
-              <Star className="w-5 h-5 text-amber-950 fill-amber-950 drop-shadow-sm" />
+            {/* Score Big Display with 3D Golden Star Pill - Exact from uploaded image */}
+            <div className="flex items-center gap-2.5 bg-gradient-to-b from-[#ffd200] via-[#ffbe00] to-[#f59e0b] text-[#3b1404] px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl border-2 border-amber-200 border-b-4 border-[#b45309] shadow-[0_4px_0_#9a3412] flex-shrink-0">
+              <Star className="w-6 h-6 text-[#3b1404] fill-[#3b1404] drop-shadow-sm" />
               <span className="text-2xl sm:text-3xl font-black tracking-tight font-mono">
                 {displayScore}
               </span>
             </div>
           </motion.div>
 
-          {/* Top Right Card: Ranking da Escola (Vertical 3D Podium Layout matching video) */}
+          {/* Top Right Card: Ranking da Escola (Vertical 3D Podium Layout matching image) */}
           <motion.div
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className="relative p-3 sm:p-3.5 rounded-2xl border-2 border-purple-400 border-b-4 border-purple-950 bg-gradient-to-br from-[#2e1065]/95 via-[#3b177d]/95 to-[#1e1b4b]/95 backdrop-blur-md shadow-[0_4px_0_#1e1b4b] flex flex-col justify-between gap-2"
+            className="relative p-4 sm:p-5 rounded-3xl border-4 border-[#ea580c] border-b-[6px] border-[#9a3412] bg-[#2e1065] shadow-[0_6px_0_#7c2d12,0_10px_25px_rgba(0,0,0,0.5)] flex flex-col justify-between gap-2.5"
           >
-            {/* Top 3 List Vertically Stacked (Exact from reference video) */}
+            {/* Top 3 List Vertically Stacked */}
             <div className="flex flex-col gap-1.5 flex-1 justify-center">
               {leaderboard.topThree.slice(0, 3).map((item, idx) => {
                 const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉';
                 const rankText = idx === 0 ? '1º' : idx === 1 ? '2º' : '3º';
                 const rankColor =
-                  idx === 0 ? 'text-amber-300' : idx === 1 ? 'text-slate-200' : 'text-amber-500';
+                  idx === 0 ? 'text-[#facc15]' : idx === 1 ? 'text-slate-200' : 'text-amber-500';
                 return (
                   <div
                     key={idx}
-                    className="flex items-center justify-between px-3 py-1 rounded-xl bg-white/10 border border-purple-300/25 text-xs font-bold text-white shadow-xs"
+                    className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-[#1e0a3c] border border-purple-900/60 text-xs font-bold text-white shadow-xs"
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-sm leading-none">{medal}</span>
@@ -940,21 +1093,231 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
                         {item.studentName.split(' ')[0]}
                       </span>
                     </div>
-                    <span className="font-mono font-black text-amber-300">{item.score}</span>
+                    <span className="font-mono font-black text-[#facc15]">{item.score}</span>
                   </div>
                 );
               })}
             </div>
 
-            {/* Current Student Rank Pill (Arched 3D Amber Yellow Pill from video) */}
-            <div className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 text-amber-950 text-xs font-black shadow-[0_2px_0_#b45309] border border-amber-200 border-b-2 border-amber-700">
-              <Star className="w-3.5 h-3.5 fill-amber-950" />
+            {/* Current Student Rank Pill */}
+            <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-b from-[#ffd200] via-[#ffbe00] to-[#f59e0b] text-[#3b1404] text-xs font-black shadow-[0_3px_0_#9a3412] border border-amber-200 border-b-2 border-[#b45309]">
+              <Star className="w-3.5 h-3.5 fill-[#3b1404] text-[#3b1404]" />
               <span>
                 Você está em <strong>{leaderboard.currentRank}º lugar</strong>!
               </span>
             </div>
           </motion.div>
         </div>
+
+        {/* ========================================================================= */}
+        {/* 2.5 COMPARISON BANNER: Comparação dos Empréstimos com o Banco de Dados do Aluno */}
+        {/* ========================================================================= */}
+        {activeStudent && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`rounded-2xl sm:rounded-3xl border-3 sm:border-4 p-3 sm:p-4 mb-3 sm:mb-4 shadow-[0_5px_0_#7c2d12,0_10px_25px_rgba(0,0,0,0.5)] transition-all ${
+              currentMatchedLoan
+                ? 'bg-[#2e1065] border-[#ea580c]'
+                : 'bg-[#2e1065] border-[#ea580c]'
+            }`}
+          >
+            {/* Top row: Comparison Status Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-purple-900/60">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center border shadow-xs ${
+                    currentMatchedLoan
+                      ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                      : 'bg-[#1e0a3c] text-amber-300 border-purple-900/60'
+                  }`}
+                >
+                  <Database className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+                      <span>Comparação de Empréstimos no Banco de Dados</span>
+                      {currentMatchedLoan ? (
+                        <span className="text-[10px] font-black text-emerald-300 bg-emerald-900/60 border border-emerald-500/40 px-2 py-0.2 rounded-full flex items-center gap-1">
+                          <BadgeCheck className="w-3 h-3 text-emerald-400" />
+                          <span>Combinando com o Aluno</span>
+                        </span>
+                      ) : studentLoans.length > 0 ? (
+                        <span className="text-[10px] font-bold text-amber-300 bg-amber-900/60 border border-amber-500/40 px-2 py-0.2 rounded-full">
+                          {studentLoans.length} empréstimo(s) no banco
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold text-slate-400 bg-slate-800/80 border border-slate-700 px-2 py-0.2 rounded-full">
+                          0 empréstimos no banco
+                        </span>
+                      )}
+                    </h3>
+                  </div>
+                  <p className="text-[11px] text-slate-300">
+                    Aluno: <strong className="text-amber-300">{activeStudent.name}</strong> • Matrícula/Código:{' '}
+                    <strong className="text-slate-200">{activeStudent.studentCode || 'Cadastrado'}</strong> • Turma:{' '}
+                    <span className="text-slate-200">{activeStudent.class}</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Action: Open Book Selector Modal */}
+              <div className="flex items-center gap-2 self-end sm:self-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBookSelectorTab(studentBooks.length > 0 ? 'loans' : 'catalog');
+                    setIsBookSelectorModalOpen(true);
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-amber-950 font-black text-xs shadow-[0_2px_0_#9a3412] border border-amber-200 border-b-2 border-orange-800 active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <ArrowRightLeft className="w-3.5 h-3.5" />
+                  <span>Trocar Livro do Aluno</span>
+                  {studentBooks.length > 0 && (
+                    <span className="bg-amber-950 text-amber-200 text-[10px] px-1.5 py-0.2 rounded-full font-mono">
+                      {studentBooks.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Middle: Active Book Loan Match Details */}
+            {currentMatchedLoan ? (
+              <div className="mt-2.5 pt-1 flex flex-col md:flex-row md:items-center justify-between gap-2.5 bg-emerald-950/40 border border-emerald-500/25 rounded-xl p-2.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-12 rounded-md overflow-hidden bg-slate-800 border border-emerald-500/40 flex-shrink-0">
+                    {selectedBookForQuiz.cover ? (
+                      <img
+                        src={selectedBookForQuiz.cover}
+                        alt={selectedBookForQuiz.title}
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <BookOpen className="w-4 h-4 text-emerald-400 m-auto mt-4" />
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[11px] font-black text-emerald-300 flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                        Livro da Missão Validado no Banco de Dados:
+                      </span>
+                      <span
+                        className={`text-[10px] font-black uppercase px-2 py-0.2 rounded-md border ${
+                          currentMatchedLoan.status === 'em_andamento'
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                            : currentMatchedLoan.status === 'atrasado'
+                            ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                            : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                        }`}
+                      >
+                        {currentMatchedLoan.status === 'em_andamento'
+                          ? 'Em Andamento'
+                          : currentMatchedLoan.status === 'atrasado'
+                          ? 'Prazo Expirado'
+                          : 'Devolvido / Lido'}
+                      </span>
+                    </div>
+                    <h4 className="text-xs sm:text-sm font-black text-white truncate max-w-sm sm:max-w-md">
+                      {selectedBookForQuiz.title}
+                    </h4>
+                    <p className="text-[10px] text-slate-300">
+                      Retirado em: <strong className="text-white">{currentMatchedLoan.loanDate}</strong> • Devolução prevista:{' '}
+                      <strong className="text-white">{currentMatchedLoan.returnDate}</strong>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Score in this book if any */}
+                {(gameData.bookScores || {})[selectedBookForQuiz.title] && (
+                  <div className="self-start md:self-center px-2.5 py-1 rounded-lg bg-amber-400/20 border border-amber-400/40 text-amber-300 text-[11px] font-bold flex items-center gap-1.5">
+                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                    <span>
+                      Pontuação neste livro:{' '}
+                      <strong>
+                        {(gameData.bookScores || {})[selectedBookForQuiz.title]?.points} pts
+                      </strong>
+                    </span>
+                  </div>
+                )}
+              </div>
+            ) : studentBooks.length > 0 ? (
+              <div className="mt-2.5 pt-1 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <p className="text-xs text-amber-200">
+                    O livro atual (<strong>{selectedBookForQuiz.title}</strong>) é do acervo geral. Seus empréstimos registrados no banco de dados estão disponíveis abaixo para combinar com o Quiz!
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleSelectBookForQuiz(studentBooks[0].book, true)}
+                  className="px-2.5 py-1 rounded-lg bg-amber-400 text-amber-950 text-[11px] font-black hover:bg-amber-300 cursor-pointer self-start sm:self-auto shrink-0"
+                >
+                  Mudar para {studentBooks[0].book.title.slice(0, 20)}... ➔
+                </button>
+              </div>
+            ) : (
+              <div className="mt-2.5 pt-1 p-2.5 rounded-xl bg-[#1e0a3c] border border-purple-900/60 flex items-center gap-2.5 text-slate-200 text-xs">
+                <BookOpen className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                <p>
+                  Nenhum empréstimo ativo registrado para este aluno no momento. Você pode treinar livremente com as perguntas do livro <strong>{selectedBookForQuiz.title}</strong> ou retirar um exemplar na biblioteca escolar para validar seu empréstimo oficial!
+                </p>
+              </div>
+            )}
+
+            {/* Quick-switch row: If student has multiple borrowed books in the database */}
+            {studentBooks.length > 1 && (
+              <div className="mt-2 pt-2 border-t border-white/10 flex items-center gap-2 overflow-x-auto pb-0.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex-shrink-0 flex items-center gap-1">
+                  <BookCheck className="w-3 h-3 text-amber-400" />
+                  Seus Empréstimos:
+                </span>
+                <div className="flex items-center gap-1.5 flex-nowrap">
+                  {studentBooks.map((sb) => {
+                    const isCurrent =
+                      selectedBookForQuiz.id === sb.book.id ||
+                      selectedBookForQuiz.title.trim().toLowerCase() === sb.book.title.trim().toLowerCase();
+                    return (
+                      <button
+                        key={sb.book.id || sb.loan.id}
+                        type="button"
+                        onClick={() => handleSelectBookForQuiz(sb.book, true)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1.5 flex-shrink-0 border ${
+                          isCurrent
+                            ? 'bg-emerald-500 text-slate-950 border-emerald-300 shadow-sm font-black'
+                            : 'bg-white/10 text-slate-200 hover:bg-white/20 border-white/15'
+                        }`}
+                        title={sb.book.title}
+                      >
+                        {isCurrent && <Check className="w-3 h-3 text-slate-950" />}
+                        <span className="max-w-[130px] truncate">{sb.book.title}</span>
+                        <span
+                          className={`text-[9px] px-1 rounded-xs font-semibold ${
+                            sb.loan.status === 'em_andamento'
+                              ? 'bg-emerald-900/60 text-emerald-200'
+                              : sb.loan.status === 'atrasado'
+                              ? 'bg-rose-900/60 text-rose-200'
+                              : 'bg-cyan-900/60 text-cyan-200'
+                          }`}
+                        >
+                          {sb.loan.status === 'em_andamento'
+                            ? 'Ativo'
+                            : sb.loan.status === 'atrasado'
+                            ? 'Vencido'
+                            : 'Lido'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
 
         {/* ========================================================================= */}
         {/* 3. MAIN GAME QUIZ AREA: Quitério Mascot (Left) + 3D Cat Quiz Window (Right) */}
@@ -1251,10 +1614,13 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
                         <>
                           <button
                             type="button"
-                            onClick={() => setIsBookSelectorModalOpen(true)}
+                            onClick={() => {
+                              setBookSelectorTab(studentBooks.length > 0 ? 'loans' : 'catalog');
+                              setIsBookSelectorModalOpen(true);
+                            }}
                             className="px-3.5 py-2 rounded-xl border-2 border-amber-300 bg-white hover:bg-amber-50 text-amber-950 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
                           >
-                            <BookOpen className="w-3.5 h-3.5" />
+                            <ArrowRightLeft className="w-3.5 h-3.5" />
                             <span>Trocar Livro</span>
                           </button>
                           <button
@@ -1306,13 +1672,26 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
                           <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-wider text-orange-800 bg-orange-100 px-1.5 sm:px-2 py-0.5 rounded-md border border-orange-200">
                             Questão {currentQuestionIndex + 1}/{currentQuestions.length}
                           </span>
+                          {currentMatchedLoan ? (
+                            <span className="text-[9px] sm:text-[10px] font-black text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-1.5 py-0.5 rounded-md flex items-center gap-1">
+                              <BadgeCheck className="w-3 h-3 text-emerald-600" />
+                              <span>Empréstimo no Banco</span>
+                            </span>
+                          ) : (
+                            <span className="text-[9px] sm:text-[10px] font-medium text-amber-900 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded-md">
+                              Acervo Geral
+                            </span>
+                          )}
                           <button
                             type="button"
-                            onClick={() => setIsBookSelectorModalOpen(true)}
+                            onClick={() => {
+                              setBookSelectorTab(studentBooks.length > 0 ? 'loans' : 'catalog');
+                              setIsBookSelectorModalOpen(true);
+                            }}
                             className="text-[9px] sm:text-[10px] font-bold text-amber-800 hover:text-amber-950 bg-amber-200/80 hover:bg-amber-300 px-1.5 py-0.5 rounded-md border border-amber-300 transition-all cursor-pointer flex items-center gap-1"
-                            title="Escolher outro livro"
+                            title="Trocar livro do desafio"
                           >
-                            <BookOpen className="w-3 h-3" />
+                            <ArrowRightLeft className="w-3 h-3" />
                             <span>Trocar</span>
                           </button>
                         </div>
@@ -1367,11 +1746,11 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
                       const isSelected = selectedOption === optIndex;
                       const isThisCorrect = optIndex === activeQuestion.correctIndex;
 
-                      // Visual styling with 3D depth and lively youth arcade colors matching the video
+                      // Visual styling with 3D depth and lively arcade colors matching the theme
                       let cardStyle =
-                        'bg-[#f0f9ff] hover:bg-[#e0f2fe] text-[#0f172a] border-2 border-[#7dd3fc] border-b-4 border-[#0284c7] shadow-[0_4px_0_#0284c7] active:translate-y-1 active:border-b-2 active:shadow-[0_1px_0_#0284c7]';
+                        'bg-[#fffdf9] hover:bg-[#fff7ed] text-[#2e1305] border-2 border-amber-300 border-b-4 border-[#ea580c] shadow-[0_4px_0_#c2410c] active:translate-y-1 active:border-b-2 active:shadow-[0_1px_0_#c2410c]';
                       let badgeStyle =
-                        'bg-white text-[#0284c7] border-2 border-[#7dd3fc] shadow-xs';
+                        'bg-amber-100 text-[#ea580c] border-2 border-amber-300 shadow-xs';
 
                       if (isAnswered) {
                         if (isThisCorrect) {
@@ -1396,8 +1775,13 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
                           key={optIndex}
                           whileHover={!isAnswered ? { scale: 1.01 } : {}}
                           whileTap={!isAnswered ? { scale: 0.98 } : {}}
-                          disabled={isAnswered}
-                          onClick={() => handleSelectOption(optIndex)}
+                          onClick={() => {
+                            if (isAnswered) {
+                              handleNextQuestion();
+                            } else {
+                              handleSelectOption(optIndex);
+                            }
+                          }}
                           className={`p-3 sm:p-3.5 rounded-2xl text-left transition-all flex items-center justify-between gap-2.5 cursor-pointer min-h-[52px] ${cardStyle}`}
                         >
                           <div className="flex items-center sm:items-start gap-2.5">
@@ -1428,10 +1812,9 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
 
                   {/* Feedback & Next Button Row (3D Tactile Layout) */}
                   {isAnswered && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-4 pt-3.5 border-t-2 border-amber-300/60 flex flex-col sm:flex-row items-center justify-between gap-3"
+                    <div
+                      onClick={() => handleNextQuestion()}
+                      className="mt-4 pt-3.5 border-t-2 border-amber-300/60 flex flex-col sm:flex-row items-center justify-between gap-3 cursor-pointer"
                     >
                       <div className="flex items-center gap-2 w-full sm:w-auto">
                         {/* +100 Pontos 3D Badge */}
@@ -1449,29 +1832,39 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
                         {/* Kitten cheer bubble pill */}
                         <div className="flex-1 sm:flex-initial px-3 sm:px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-100 to-orange-100 border-2 border-amber-300/80 border-b-3 border-amber-400 text-xs sm:text-sm text-amber-950 font-bold leading-tight flex items-center gap-2 shadow-sm">
                           <span className="text-sm">🐾</span>
-                          <span>
-                            {isCorrect
-                              ? 'Você mandou bem! Continua lendo e acertando as perguntas!'
-                              : 'Quase lá! Continue lendo que você consegue!'}
-                          </span>
+                          <div>
+                            <span className="block">
+                              {isCorrect
+                                ? 'Você mandou bem! Continua lendo e acertando as perguntas!'
+                                : 'Quase lá! Continue lendo que você consegue!'}
+                            </span>
+                            <span className="text-[10px] text-amber-800/80 font-bold block mt-0.5 animate-pulse">
+                              {currentQuestionIndex < currentQuestions.length - 1
+                                ? 'Indo para a próxima pergunta...'
+                                : 'Indo para o resultado...'}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
-                      {/* 3D Next Button */}
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={handleNextQuestion}
-                        className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-white font-black text-xs sm:text-sm shadow-[0_4px_0_#064e3b] border-2 border-emerald-300 border-b-4 border-emerald-800 active:translate-y-1 active:border-b-2 active:shadow-[0_1px_0_#064e3b] flex items-center justify-center gap-2 cursor-pointer transition-all"
+                      {/* 3D Next Button - Native button with zero lag */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleNextQuestion();
+                        }}
+                        className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 active:scale-95 active:translate-y-1 text-white font-black text-xs sm:text-sm shadow-[0_4px_0_#064e3b] border-2 border-emerald-300 border-b-4 border-emerald-800 flex items-center justify-center gap-2 cursor-pointer transition-all"
+                        title="Avançar imediatamente"
                       >
                         <span>
                           {currentQuestionIndex < currentQuestions.length - 1
                             ? 'Próxima Pergunta'
                             : 'Ver Resultado'}
                         </span>
-                        <ArrowRight className="w-4 h-4" />
-                      </motion.button>
-                    </motion.div>
+                        <ArrowRight className="w-4 h-4 animate-pulse" />
+                      </button>
+                    </div>
                   )}
                 </>
               ) : (
@@ -1560,10 +1953,13 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
                         </button>
                         <button
                           type="button"
-                          onClick={() => setIsBookSelectorModalOpen(true)}
+                          onClick={() => {
+                            setBookSelectorTab(studentBooks.length > 0 ? 'loans' : 'catalog');
+                            setIsBookSelectorModalOpen(true);
+                          }}
                           className="px-4 py-2.5 rounded-2xl border-2 border-amber-300 bg-white hover:bg-amber-50 text-amber-900 font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer shadow-sm transition-all"
                         >
-                          <BookOpen className="w-4 h-4" />
+                          <ArrowRightLeft className="w-4 h-4" />
                           <span>Trocar Livro</span>
                         </button>
                         <button
@@ -1626,7 +2022,7 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
             </div>
             <ChevronRight className="w-3 h-3 text-purple-400 flex-shrink-0" />
             <div className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-slate-200">
-              <GraduationCap className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
+              <GraduationCap className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
               <span>Responda desafios</span>
             </div>
             <ChevronRight className="w-3 h-3 text-purple-400 flex-shrink-0" />
@@ -1730,8 +2126,8 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className={`relative w-full max-w-md border-2 rounded-3xl p-6 shadow-2xl ${
-                isDark ? 'bg-[#001424] border-[#163e5e]' : 'bg-white border-slate-200'
+              className={`relative w-full max-w-md border-3 rounded-3xl p-6 shadow-2xl ${
+                isDark ? 'bg-[#240c4a] border-[#ea580c] shadow-[0_6px_0_#7c2d12]' : 'bg-[#fffdfa] border-[#ea580c] shadow-[0_6px_0_#7c2d12]'
               }`}
             >
               {/* Botão Fechar (X) - Retorna ao início */}
@@ -1789,8 +2185,8 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
                       placeholder="Digite seu código"
                       className={`w-full px-4 py-3 rounded-2xl border text-base font-mono uppercase tracking-widest text-center focus:outline-none focus:ring-2 disabled:opacity-50 ${
                         isDark
-                          ? 'bg-[#071828] border-[#163e5e] text-white focus:border-amber-400 focus:ring-amber-400/20'
-                          : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-amber-500/20'
+                          ? 'bg-[#1a0735] border-purple-900/60 text-white focus:border-amber-400 focus:ring-amber-400/20'
+                          : 'bg-amber-50/50 border-amber-300 text-slate-900 focus:border-amber-500 focus:ring-amber-500/20'
                       }`}
                     />
                   </div>
@@ -1858,77 +2254,316 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
               {/* Header */}
               <div className="flex items-center gap-3 mb-3 border-b-2 border-amber-300/80 pb-3">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-amber-400 border-2 border-amber-200 border-b-4 border-orange-700 flex items-center justify-center text-xl shadow-sm flex-shrink-0">
-                  📚
+                  <Database className="w-5 h-5 sm:w-6 sm:h-6 text-amber-950" />
                 </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-black text-[#2e1305]">
-                    Escolher Livro para o Desafio
-                  </h3>
-                  <p className="text-xs text-amber-900/80 font-medium">
-                    Selecione qual livro você leu para responder às perguntas do Quitério!
+                <div className="flex-1 pr-6">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-base sm:text-lg font-black text-[#2e1305]">
+                      Trocar Livro da Missão Quitério
+                    </h3>
+                    {activeStudent && (
+                      <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <BadgeCheck className="w-3 h-3 text-emerald-600" />
+                        <span>Banco do Aluno Conectado</span>
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-amber-900/80 font-medium mt-0.5">
+                    {activeStudent
+                      ? `Aluno: ${activeStudent.name} (${activeStudent.studentCode || 'Código ativo'})`
+                      : 'Selecione a obra combinada com o seu empréstimo para o Quiz!'}
                   </p>
                 </div>
               </div>
 
-              {/* Book List Grid */}
-              <div className="flex-1 overflow-y-auto space-y-2 pr-1 my-1">
-                {books.map((b) => {
-                  const isCurrent = selectedBookForQuiz.id === b.id;
-                  const bookScore = (gameData.bookScores || {})[b.title];
+              {/* Tabs: Meus Empréstimos no Banco vs Acervo Geral */}
+              <div className="flex items-center gap-2 mb-2.5 p-1 rounded-2xl bg-amber-200/70 border border-amber-300">
+                <button
+                  type="button"
+                  onClick={() => setBookSelectorTab('loans')}
+                  className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    bookSelectorTab === 'loans'
+                      ? 'bg-orange-600 text-white shadow-sm'
+                      : 'text-amber-950 hover:bg-amber-300/50'
+                  }`}
+                >
+                  <BookCheck className="w-3.5 h-3.5" />
+                  <span>Meus Empréstimos</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                      bookSelectorTab === 'loans'
+                        ? 'bg-orange-800 text-amber-200'
+                        : 'bg-amber-300 text-amber-950'
+                    }`}
+                  >
+                    {studentBooks.length}
+                  </span>
+                </button>
 
-                  return (
-                    <div
-                      key={b.id}
-                      onClick={() => handleSelectBookForQuiz(b)}
-                      className={`p-2.5 sm:p-3 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${
-                        isCurrent
-                          ? 'bg-amber-200/90 border-amber-500 border-b-4 border-orange-700 shadow-[0_2px_0_#c2410c]'
-                          : 'bg-white/90 hover:bg-amber-50 border-amber-300/80 border-b-3 border-amber-400 shadow-xs'
+                <button
+                  type="button"
+                  onClick={() => setBookSelectorTab('catalog')}
+                  className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    bookSelectorTab === 'catalog'
+                      ? 'bg-orange-600 text-white shadow-sm'
+                      : 'text-amber-950 hover:bg-amber-300/50'
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>Acervo Geral</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                      bookSelectorTab === 'catalog'
+                        ? 'bg-orange-800 text-amber-200'
+                        : 'bg-amber-300 text-amber-950'
+                    }`}
+                  >
+                    {books.length}
+                  </span>
+                </button>
+              </div>
+
+              {/* Sub-filters or Search depending on active tab */}
+              {bookSelectorTab === 'loans' ? (
+                <div className="flex items-center justify-between gap-2 mb-2 px-1">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setBookSelectorFilter('all')}
+                      className={`px-2.5 py-0.8 rounded-lg text-[11px] font-bold cursor-pointer transition-all ${
+                        bookSelectorFilter === 'all'
+                          ? 'bg-amber-900 text-white shadow-xs'
+                          : 'bg-amber-100 text-amber-900 hover:bg-amber-200'
                       }`}
                     >
-                      <div className="flex items-center gap-2.5 truncate">
-                        <div className="w-10 h-14 rounded-lg overflow-hidden border border-amber-300 flex-shrink-0 bg-amber-100 flex items-center justify-center">
-                          {b.cover ? (
-                            <img
-                              src={b.cover}
-                              alt={b.title}
-                              className="w-full h-full object-cover"
-                              referrerPolicy="no-referrer"
-                            />
-                          ) : (
-                            <BookOpen className="w-4 h-4 text-amber-500" />
-                          )}
-                        </div>
-                        <div className="truncate">
-                          <h4 className="text-xs sm:text-sm font-black text-[#2e1305] truncate">
-                            {b.title}
-                          </h4>
-                          <span className="text-[11px] text-amber-900/80 font-medium block truncate">
-                            {b.author}
-                          </span>
-                          {bookScore && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded-md mt-1">
-                              <span>✓ Pontuado:</span>
-                              <strong>{bookScore.points} pts</strong>
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                      Todos ({studentBooks.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBookSelectorFilter('active')}
+                      className={`px-2.5 py-0.8 rounded-lg text-[11px] font-bold cursor-pointer transition-all ${
+                        bookSelectorFilter === 'active'
+                          ? 'bg-emerald-700 text-white shadow-xs'
+                          : 'bg-emerald-100 text-emerald-900 hover:bg-emerald-200'
+                      }`}
+                    >
+                      Em Andamento ({activeStudentLoans.length})
+                    </button>
+                  </div>
+                  <span className="text-[10px] text-amber-900/70 font-semibold hidden sm:inline">
+                    Base: Banco de Empréstimos
+                  </span>
+                </div>
+              ) : (
+                <div className="relative mb-2.5 px-0.5">
+                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-amber-800" />
+                  <input
+                    type="text"
+                    value={bookSearchQuery}
+                    onChange={(e) => setBookSearchQuery(e.target.value)}
+                    placeholder="Pesquisar por título ou autor no acervo..."
+                    className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-amber-300 bg-white/95 text-xs text-[#2e1305] placeholder:text-amber-800/50 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  />
+                </div>
+              )}
 
-                      <div className="flex-shrink-0">
-                        {isCurrent ? (
-                          <span className="text-[10px] sm:text-xs font-black bg-orange-600 text-white px-2.5 py-1 rounded-xl shadow-xs">
-                            Selecionado
-                          </span>
-                        ) : (
-                          <span className="text-[10px] sm:text-xs font-bold text-amber-900 bg-amber-100 px-2.5 py-1 rounded-xl hover:bg-amber-200">
-                            Escolher
-                          </span>
-                        )}
-                      </div>
+              {/* Book List Grid */}
+              <div className="flex-1 overflow-y-auto space-y-2 pr-1 my-1">
+                {bookSelectorTab === 'loans' ? (
+                  studentBooks.length === 0 ? (
+                    <div className="py-8 px-4 text-center rounded-2xl bg-amber-100/70 border-2 border-dashed border-amber-300">
+                      <Bookmark className="w-8 h-8 text-amber-600 mx-auto mb-2 opacity-60" />
+                      <h4 className="text-sm font-black text-[#2e1305]">
+                        Nenhum empréstimo ativo no banco de dados
+                      </h4>
+                      <p className="text-xs text-amber-900/80 mt-1 max-w-sm mx-auto">
+                        O aluno <strong>{activeStudent?.name || 'ativo'}</strong> ainda não possui livros registrados na tabela de empréstimos.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setBookSelectorTab('catalog')}
+                        className="mt-3 px-3 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-black shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+                      >
+                        <Layers className="w-3.5 h-3.5" />
+                        <span>Ver Livros do Acervo Geral</span>
+                      </button>
                     </div>
-                  );
-                })}
+                  ) : (
+                    studentBooks
+                      .filter((sb) => {
+                        if (bookSelectorFilter === 'active') {
+                          return sb.loan.status === 'em_andamento' || sb.loan.status === 'atrasado';
+                        }
+                        return true;
+                      })
+                      .map((sb) => {
+                        const isCurrent =
+                          selectedBookForQuiz.id === sb.book.id ||
+                          selectedBookForQuiz.title.trim().toLowerCase() === sb.book.title.trim().toLowerCase();
+                        const bookScore = (gameData.bookScores || {})[sb.book.title];
+
+                        return (
+                          <div
+                            key={sb.book.id || sb.loan.id}
+                            onClick={() => handleSelectBookForQuiz(sb.book, true)}
+                            className={`p-3 rounded-2xl border-2 transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                              isCurrent
+                                ? 'bg-amber-200/90 border-amber-500 border-b-4 border-orange-700 shadow-[0_2px_0_#c2410c]'
+                                : 'bg-white/95 hover:bg-amber-50 border-amber-300/80 border-b-3 border-amber-400 shadow-xs'
+                            }`}
+                          >
+                            <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                              <div className="w-12 h-16 rounded-xl overflow-hidden border-2 border-amber-300 flex-shrink-0 bg-amber-100 flex items-center justify-center shadow-xs">
+                                {sb.book.cover ? (
+                                  <img
+                                    src={sb.book.cover}
+                                    alt={sb.book.title}
+                                    className="w-full h-full object-cover"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                ) : (
+                                  <BookOpen className="w-5 h-5 text-amber-500" />
+                                )}
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span
+                                    className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md border ${
+                                      sb.loan.status === 'em_andamento'
+                                        ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                        : sb.loan.status === 'atrasado'
+                                        ? 'bg-rose-100 text-rose-800 border-rose-300'
+                                        : 'bg-cyan-100 text-cyan-800 border-cyan-300'
+                                    }`}
+                                  >
+                                    {sb.loan.status === 'em_andamento'
+                                      ? 'Em Andamento'
+                                      : sb.loan.status === 'atrasado'
+                                      ? 'Prazo Expirado'
+                                      : 'Devolvido / Lido'}
+                                  </span>
+                                  <span className="text-[10px] text-amber-900/70 font-semibold">
+                                    Cód: {sb.loan.id}
+                                  </span>
+                                </div>
+
+                                <h4 className="text-xs sm:text-sm font-black text-[#2e1305] truncate mt-0.5">
+                                  {sb.book.title}
+                                </h4>
+                                <span className="text-[11px] text-amber-900/80 font-medium block truncate">
+                                  {sb.book.author}
+                                </span>
+
+                                <div className="flex items-center gap-2 mt-1 text-[10px] text-amber-950/80 flex-wrap">
+                                  <span>Retirado: <strong>{sb.loan.loanDate}</strong></span>
+                                  <span>•</span>
+                                  <span>Devolução: <strong>{sb.loan.returnDate}</strong></span>
+                                </div>
+
+                                {bookScore && (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded-md mt-1">
+                                    <Star className="w-3 h-3 fill-emerald-600 text-emerald-600" />
+                                    <span>Pontuado: {bookScore.points} pts ({bookScore.score}/{bookScore.totalQuestions})</span>
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-end sm:flex-col sm:items-end gap-1 flex-shrink-0">
+                              {isCurrent ? (
+                                <span className="text-[11px] font-black bg-orange-600 text-white px-3 py-1.5 rounded-xl shadow-xs flex items-center gap-1">
+                                  <Check className="w-3.5 h-3.5" />
+                                  <span>Livro Atual</span>
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSelectBookForQuiz(sb.book, true);
+                                  }}
+                                  className="text-[11px] font-black text-amber-950 bg-amber-400 hover:bg-amber-300 px-3 py-1.5 rounded-xl border border-amber-500 shadow-xs cursor-pointer transition-all active:translate-y-0.5"
+                                >
+                                  Jogar Missão ➔
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                  )
+                ) : (
+                  books
+                    .filter((b) => {
+                      if (!bookSearchQuery.trim()) return true;
+                      const q = bookSearchQuery.toLowerCase();
+                      return (
+                        b.title.toLowerCase().includes(q) ||
+                        b.author.toLowerCase().includes(q) ||
+                        b.category.toLowerCase().includes(q)
+                      );
+                    })
+                    .map((b) => {
+                      const isCurrent =
+                        selectedBookForQuiz.id === b.id ||
+                        selectedBookForQuiz.title.trim().toLowerCase() === b.title.trim().toLowerCase();
+                      const bookScore = (gameData.bookScores || {})[b.title];
+
+                      return (
+                        <div
+                          key={b.id}
+                          onClick={() => handleSelectBookForQuiz(b, false)}
+                          className={`p-2.5 sm:p-3 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                            isCurrent
+                              ? 'bg-amber-200/90 border-amber-500 border-b-4 border-orange-700 shadow-[0_2px_0_#c2410c]'
+                              : 'bg-white/95 hover:bg-amber-50 border-amber-300/80 border-b-3 border-amber-400 shadow-xs'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 truncate">
+                            <div className="w-10 h-14 rounded-lg overflow-hidden border border-amber-300 flex-shrink-0 bg-amber-100 flex items-center justify-center">
+                              {b.cover ? (
+                                <img
+                                  src={b.cover}
+                                  alt={b.title}
+                                  className="w-full h-full object-cover"
+                                  referrerPolicy="no-referrer"
+                                />
+                              ) : (
+                                <BookOpen className="w-4 h-4 text-amber-500" />
+                              )}
+                            </div>
+                            <div className="truncate">
+                              <h4 className="text-xs sm:text-sm font-black text-[#2e1305] truncate">
+                                {b.title}
+                              </h4>
+                              <span className="text-[11px] text-amber-900/80 font-medium block truncate">
+                                {b.author}
+                              </span>
+                              {bookScore && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded-md mt-1">
+                                  <span>✓ Pontuado:</span>
+                                  <strong>{bookScore.points} pts</strong>
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex-shrink-0">
+                            {isCurrent ? (
+                              <span className="text-[10px] sm:text-xs font-black bg-orange-600 text-white px-2.5 py-1 rounded-xl shadow-xs">
+                                Selecionado
+                              </span>
+                            ) : (
+                              <span className="text-[10px] sm:text-xs font-bold text-amber-900 bg-amber-100 px-2.5 py-1 rounded-xl hover:bg-amber-200">
+                                Escolher
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                )}
               </div>
 
               {/* Footer */}

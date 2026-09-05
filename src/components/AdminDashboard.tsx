@@ -955,7 +955,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </button>
                 )}
                 <button
-                  onClick={onOpenManageBooks || (() => setActiveTab('catalogo'))}
+                  onClick={onOpenNewBook || onOpenManageBooks || (() => setActiveTab('catalogo'))}
                   className="px-4 py-2.5 rounded-xl bg-[#009b5a] hover:bg-[#00b368] text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md"
                 >
                   <Plus className="w-4 h-4" />

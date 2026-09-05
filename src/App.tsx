@@ -31,7 +31,7 @@ import { Book, Loan, Student, Suggestion, ActiveTab, UserSession, AdminUser, Aud
 import { useTheme } from './context/ThemeContext';
 
 export default function App() {
-  const { isDark, isKinetic } = useTheme();
+  const { isDark, isKinetic, isOcean } = useTheme();
   const DB_VERSION = 'bmq_db_v9_25_avatars';
 
   const [books, setBooks] = useState<Book[]>(() => {
@@ -682,9 +682,9 @@ export default function App() {
       className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
         isKinetic
           ? 'bg-[#0c1014] text-slate-100 selection:bg-[#0088cc] selection:text-white'
-          : isDark
-          ? 'bg-[#00101c] text-slate-100 selection:bg-emerald-500 selection:text-slate-950'
-          : 'bg-[#f8fafc] text-slate-900 selection:bg-emerald-500 selection:text-white'
+          : isOcean
+          ? 'bg-[#001424] text-slate-100 selection:bg-cyan-500 selection:text-slate-950'
+          : 'bg-[#00101c] text-slate-100 selection:bg-emerald-500 selection:text-slate-950'
       }`}
     >
       {/* Global Header */}
@@ -733,6 +733,7 @@ export default function App() {
             onSelectBook={handleSelectBook}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
+            onOpenRegisterBook={() => setIsRegisterBookOpen(true)}
           />
         )}
 
@@ -817,7 +818,7 @@ export default function App() {
               setSelectedBook(firstAvail);
               setIsLoanModalOpen(true);
             }}
-            onOpenNewBook={() => setIsManageBooksOpen(true)}
+            onOpenNewBook={() => setIsRegisterBookOpen(true)}
             onOpenManageBooks={() => setIsManageBooksOpen(true)}
             onSaveStudent={handleSaveStudent}
             onCreateStudent={handleCreateStudent}
@@ -848,9 +849,17 @@ export default function App() {
             books={books}
             loans={loans}
             onSelectBook={handleSelectBook}
+            onOpenRegisterBook={() => setIsRegisterBookOpen(true)}
           />
         )}
       </main>
+
+      {/* Register Book Modal (com Câmera Fotográfica de Smartphone) */}
+      <RegisterBookModal
+        isOpen={isRegisterBookOpen}
+        onClose={() => setIsRegisterBookOpen(false)}
+        onRegisterBook={handleRegisterBook}
+      />
 
       {/* Authentication Modal */}
       <AuthModal

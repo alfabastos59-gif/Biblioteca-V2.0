@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, Star, BookOpen } from 'lucide-react';
+import { Search, SlidersHorizontal, Star, BookOpen, Camera, Plus } from 'lucide-react';
 import { Book } from '../types';
 import { CATEGORIES, getCategoryColor } from '../data/mockData';
 import { useTheme } from '../context/ThemeContext';
@@ -9,6 +9,7 @@ interface BookCatalogProps {
   onSelectBook: (book: Book) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  onOpenRegisterBook?: () => void;
 }
 
 export const BookCatalog: React.FC<BookCatalogProps> = ({
@@ -16,6 +17,7 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
   onSelectBook,
   searchQuery,
   setSearchQuery,
+  onOpenRegisterBook,
 }) => {
   const { isDark } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState('Todos');
@@ -120,25 +122,39 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
         </div>
 
         {/* Filter Trigger Button */}
-        <button
-          id="btn-catalog-filters"
-          onClick={() => setShowFiltersModal(!showFiltersModal)}
-          className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${
-            showFiltersModal || selectedStatus !== 'todos' || sortBy !== 'rating'
-              ? isDark
-                ? 'bg-[#133e4a] text-emerald-400 border-emerald-500/50'
-                : 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-sm'
-              : isDark
-              ? 'bg-[#092032] text-slate-300 border-[#163650] hover:text-white hover:border-slate-500'
-              : 'bg-white text-slate-700 border-slate-200 hover:text-slate-900 hover:border-slate-300 shadow-sm'
-          }`}
-        >
-          <SlidersHorizontal className="w-4 h-4" />
-          <span>Filtros</span>
-          {(selectedStatus !== 'todos' || sortBy !== 'rating') && (
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+        <div className="flex items-center gap-2">
+          <button
+            id="btn-catalog-filters"
+            onClick={() => setShowFiltersModal(!showFiltersModal)}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${
+              showFiltersModal || selectedStatus !== 'todos' || sortBy !== 'rating'
+                ? isDark
+                  ? 'bg-[#133e4a] text-emerald-400 border-emerald-500/50'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-sm'
+                : isDark
+                ? 'bg-[#092032] text-slate-300 border-[#163650] hover:text-white hover:border-slate-500'
+                : 'bg-white text-slate-700 border-slate-200 hover:text-slate-900 hover:border-slate-300 shadow-sm'
+            }`}
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            <span>Filtros</span>
+            {(selectedStatus !== 'todos' || sortBy !== 'rating') && (
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            )}
+          </button>
+
+          {onOpenRegisterBook && (
+            <button
+              id="btn-catalog-cadastrar-livro"
+              onClick={onOpenRegisterBook}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-900/20 transition-all cursor-pointer active:scale-95 shrink-0"
+              title="Cadastrar novo livro com foto da capa"
+            >
+              <Camera className="w-4 h-4" />
+              <span className="hidden sm:inline">Cadastrar Livro</span>
+            </button>
           )}
-        </button>
+        </div>
       </div>
 
       {/* Filter Options Expandable */}

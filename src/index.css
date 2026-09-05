@@ -14,20 +14,20 @@
   --accent-blue: #1566c0;
 }
 
-html.light, :root.light {
-  --bg-main: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-card: #ffffff;
-  --bg-subtle: #f1f5f9;
-  --border-color: #e2e8f0;
-  --border-hover: #23c65e;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --text-heading: #0f172a;
-  --accent-primary: #23c65e;
-  --accent-secondary: #00a651;
-  --accent-tertiary: #f25622;
-  --accent-blue: #1566c0;
+html.ocean, html.light, :root.light {
+  --bg-main: #001424;
+  --bg-surface: #001f35;
+  --bg-card: #092640;
+  --bg-subtle: #041624;
+  --border-color: #164264;
+  --border-hover: #00b4d8;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-heading: #ffffff;
+  --accent-primary: #00b4d8;
+  --accent-secondary: #0077b6;
+  --accent-tertiary: #90e0ef;
+  --accent-blue: #0096c7;
 }
 
 /* Kinetic Academy Palette (Primary #0088CC, Secondary #00A651, Tertiary #F25622, Neutral #1A1C1E) */
