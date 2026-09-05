@@ -1564,6 +1564,27 @@ export const CATEGORIES = [
   'Literatura'
 ];
 
+export const CATEGORY_PALETTE = [
+  { bg: 'bg-[#2563eb]', hover: 'hover:bg-[#1d4ed8]', ring: 'ring-[#2563eb]', text: 'text-white', hex: '#2563eb' }, // 1. Azul (Código)
+  { bg: 'bg-[#a855f7]', hover: 'hover:bg-[#9333ea]', ring: 'ring-[#a855f7]', text: 'text-white', hex: '#a855f7' }, // 2. Roxo (Nome)
+  { bg: 'bg-[#06b6d4]', hover: 'hover:bg-[#0891b2]', ring: 'ring-[#06b6d4]', text: 'text-white', hex: '#06b6d4' }, // 3. Ciano (Turma)
+  { bg: 'bg-[#f59e0b]', hover: 'hover:bg-[#d97706]', ring: 'ring-[#f59e0b]', text: 'text-white', hex: '#f59e0b' }, // 4. Laranja (Matrícula)
+  { bg: 'bg-[#10b981]', hover: 'hover:bg-[#059669]', ring: 'ring-[#10b981]', text: 'text-white', hex: '#10b981' }, // 5. Verde (Telefone)
+  { bg: 'bg-[#6366f1]', hover: 'hover:bg-[#4f46e5]', ring: 'ring-[#6366f1]', text: 'text-white', hex: '#6366f1' }, // 6. Índigo (Ações)
+];
+
+export const getCategoryColor = (categoryName: string, index?: number) => {
+  if (typeof index === 'number' && index >= 0) {
+    return CATEGORY_PALETTE[index % CATEGORY_PALETTE.length];
+  }
+  const catIdx = CATEGORIES.indexOf(categoryName);
+  if (catIdx !== -1) {
+    return CATEGORY_PALETTE[catIdx % CATEGORY_PALETTE.length];
+  }
+  const hash = Math.abs(categoryName.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0));
+  return CATEGORY_PALETTE[hash % CATEGORY_PALETTE.length];
+};
+
 export const MONTHLY_LOANS_DATA = [
   { month: 'Jan', count: 0 },
   { month: 'Fev', count: 0 },

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, SlidersHorizontal, Star, BookOpen } from 'lucide-react';
 import { Book } from '../types';
-import { CATEGORIES } from '../data/mockData';
+import { CATEGORIES, getCategoryColor } from '../data/mockData';
 import { useTheme } from '../context/ThemeContext';
 
 interface BookCatalogProps {
@@ -223,24 +223,33 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
         </div>
       )}
 
-      {/* Category Filter Pills (Panel 2 matching) */}
+      {/* Category Filter Pills (with vibrant custom colors) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 no-scrollbar">
-        {CATEGORIES.map((category) => (
-          <button
-            key={category}
-            id={`filter-cat-${category.toLowerCase()}`}
-            onClick={() => setSelectedCategory(category)}
-            className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
-              selectedCategory === category
-                ? 'bg-[#23c65e] text-white shadow-sm font-bold'
-                : isDark
-                ? 'bg-[#092032] text-slate-300 hover:text-white border border-[#163650] hover:border-slate-500'
-                : 'bg-white text-slate-700 hover:text-slate-900 border border-slate-200 hover:border-slate-300 shadow-sm'
-            }`}
-          >
-            {category}
-          </button>
-        ))}
+        {CATEGORIES.map((category, index) => {
+          const color = getCategoryColor(category, index);
+          const isSelected = selectedCategory === category;
+          return (
+            <button
+              key={category}
+              id={`filter-cat-${category.toLowerCase().replace(/\s+/g, '-')}`}
+              onClick={() => setSelectedCategory(category)}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 shadow-sm ${
+                color.bg
+              } ${color.hover} text-white ${
+                isSelected
+                  ? `scale-105 shadow-md ring-2 ring-white ring-offset-2 ${
+                      isDark ? 'ring-offset-[#071828]' : 'ring-offset-slate-100'
+                    } brightness-110 z-10 opacity-100 font-extrabold`
+                  : 'opacity-90 hover:opacity-100 hover:scale-[1.03]'
+              }`}
+            >
+              {isSelected && (
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse shrink-0" />
+              )}
+              <span>{category}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Book Grid */}

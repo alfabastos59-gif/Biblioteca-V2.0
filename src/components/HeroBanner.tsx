@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, BookOpen, Users, RefreshCw, BarChart3, ChevronRight, Star, Cat } from 'lucide-react';
+import { Search, BookOpen, Users, RefreshCw, BarChart3, ChevronRight, Star } from 'lucide-react';
 import { Book, Loan, Student } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { HomeRankingWidget } from './HomeRankingWidget';
@@ -63,44 +63,6 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            {/* Institution Badge */}
-            <div
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-4 shadow-sm border ${
-                isKinetic
-                  ? 'bg-[#1a1c1e] border-[#2a313a] text-[#0088cc]'
-                  : isDark
-                  ? 'bg-[#092032] border-[#163650] text-emerald-400'
-                  : 'bg-white border-emerald-200 text-emerald-700 shadow-sm'
-              }`}
-            >
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  isKinetic ? 'bg-[#0088cc]' : 'bg-[#23c65e]'
-                } animate-pulse`}
-              />
-              <span>Colégio Estadual do Campo Maria Quitéria - TI</span>
-            </div>
-
-            {/* Missão Quitério Game Chip */}
-            {onViewMissaoQuiterio && (
-              <div>
-                <button
-                  id="btn-hero-missao-quiterio"
-                  onClick={onViewMissaoQuiterio}
-                  className="mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-indigo-500/20 to-purple-500/20 border border-amber-400/60 hover:border-amber-400 text-amber-300 text-xs sm:text-sm font-bold shadow-md hover:scale-105 transition-all cursor-pointer group"
-                >
-                  <span className="p-1 rounded-full bg-amber-400 text-amber-950">
-                    <Cat className="w-3.5 h-3.5" />
-                  </span>
-                  <span>Missão Quitério: Jogo de Perguntas Literárias 🐾</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400 text-amber-950 font-black">
-                    JOGAR
-                  </span>
-                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                </button>
-              </div>
-            )}
-
             {/* Title & Subtitle */}
             <h1
               className={`text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight mb-3 ${

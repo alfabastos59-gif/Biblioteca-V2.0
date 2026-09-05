@@ -12,6 +12,7 @@ import { AboutView } from './components/AboutView';
 import { DesignSystemModal } from './components/DesignSystemModal';
 import { LoanModal } from './components/LoanModal';
 import { ManageBooksModal } from './components/ManageBooksModal';
+import { RegisterBookModal } from './components/RegisterBookModal';
 import { AuthModal } from './components/AuthModal';
 import { StudentPortalView } from './components/StudentPortalView';
 import { RankingView } from './components/RankingView';
@@ -123,6 +124,7 @@ export default function App() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
   const [isManageBooksOpen, setIsManageBooksOpen] = useState(false);
+  const [isRegisterBookOpen, setIsRegisterBookOpen] = useState(false);
   const [isDesignSystemOpen, setIsDesignSystemOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -467,6 +469,17 @@ export default function App() {
     );
   };
 
+  const handleRegisterBook = (newBook: Book) => {
+    setBooks((prev) => [newBook, ...prev]);
+
+    logAuditEvent(
+      'livros',
+      'Novo Livro Cadastrado / Compartilhado',
+      `Obra "${newBook.title}" (Autor: ${newBook.author}, Categoria: ${newBook.category}) adicionada à biblioteca escolar.`,
+      newBook.title
+    );
+  };
+
   const handleDeleteBook = (bookId: string) => {
     if (session.role !== 'admin') {
       handleOpenLogin('admin', 'Excluir Livro');
@@ -679,6 +692,7 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={handleNavigateTab}
         onOpenDesignSystem={() => setIsDesignSystemOpen(true)}
+        onOpenRegisterBook={() => setIsRegisterBookOpen(true)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         session={session}

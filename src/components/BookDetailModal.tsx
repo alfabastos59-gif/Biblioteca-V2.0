@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Star, Heart, BookmarkCheck, MapPin, BookOpen, Check, Layers } from 'lucide-react';
 import { Book } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { getCategoryColor } from '../data/mockData';
 
 interface BookDetailModalProps {
   book: Book | null;
@@ -117,7 +118,9 @@ export const BookDetailModal: React.FC<BookDetailModalProps> = ({
               }`}>
                 <div className={`flex justify-between items-center py-0.5 border-b pb-1.5 ${isDark ? 'border-[#163650]/40' : 'border-slate-200'}`}>
                   <span className={isDark ? 'text-slate-400 font-medium' : 'text-slate-500 font-medium'}>Categoria:</span>
-                  <span className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{book.category}</span>
+                  <span className={`px-2.5 py-0.5 rounded-lg text-xs font-bold text-white shadow-xs ${getCategoryColor(book.category).bg}`}>
+                    {book.category}
+                  </span>
                 </div>
                 <div className={`flex justify-between items-center py-0.5 border-b pb-1.5 ${isDark ? 'border-[#163650]/40' : 'border-slate-200'}`}>
                   <span className={isDark ? 'text-slate-400 font-medium' : 'text-slate-500 font-medium'}>Páginas:</span>

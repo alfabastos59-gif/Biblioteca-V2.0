@@ -14,7 +14,9 @@ import {
   Trophy,
   Palette,
   Sparkles,
-  Cat
+  Cat,
+  BookPlus,
+  Camera
 } from 'lucide-react';
 import { ActiveTab, UserSession } from '../types';
 import { Logo } from './Logo';
@@ -26,6 +28,7 @@ interface HeaderProps {
   onOpenDesignSystem: () => void;
   onOpenNewLoan?: () => void;
   onOpenNewSuggestion?: () => void;
+  onOpenRegisterBook?: () => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   session: UserSession;
@@ -37,6 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
   activeTab,
   setActiveTab,
   onOpenDesignSystem,
+  onOpenRegisterBook,
   session,
   onOpenLogin,
   onLogout,
@@ -153,9 +157,6 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Cat className="w-4 h-4 text-amber-500 dark:text-amber-400" />
               <span>Missão Quitério</span>
-              <span className="ml-0.5 text-[9px] px-1.5 py-0.2 rounded-full bg-amber-400/20 text-amber-500 dark:text-amber-300 font-bold border border-amber-400/30">
-                Jogo
-              </span>
             </button>
 
             {/* If logged in as student, show "Meu Histórico" */}
@@ -201,6 +202,23 @@ export const Header: React.FC<HeaderProps> = ({
             >
               Sugestões
             </button>
+
+            {/* BOTÃO CADASTRO DE LIVROS (Com Câmera no Smartphone) */}
+            <button
+              id="nav-cadastro-livros"
+              onClick={onOpenRegisterBook}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                isKinetic
+                  ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/40'
+                  : isDark
+                  ? 'bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/30'
+                  : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-300'
+              }`}
+            >
+              <Camera className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+              <span>Cadastro de Livros</span>
+            </button>
+
             <button
               id="nav-sobre"
               onClick={() => setActiveTab('sobre')}
@@ -563,9 +581,6 @@ export const Header: React.FC<HeaderProps> = ({
                 <Cat className="w-4 h-4 text-amber-500" />
                 <span>Missão Quitério</span>
               </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400 text-amber-950 font-black">
-                JOGO
-              </span>
             </button>
             {isStudent && (
               <button
@@ -599,6 +614,20 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               Sugestões
+            </button>
+            <button
+              onClick={() => {
+                onOpenRegisterBook?.();
+                setMobileMenuOpen(false);
+              }}
+              className={`p-2.5 rounded-xl text-sm font-medium text-left flex items-center gap-2 ${
+                isDark
+                  ? 'bg-[#092032] text-emerald-400 border border-emerald-500/30'
+                  : 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+              }`}
+            >
+              <Camera className="w-4 h-4 text-emerald-400" />
+              <span>Cadastro de Livros</span>
             </button>
           </div>
 

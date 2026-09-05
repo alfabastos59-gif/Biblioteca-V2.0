@@ -11,22 +11,26 @@ import {
   Lightbulb,
   Settings,
   LogOut,
-  Smartphone
+  Smartphone,
+  Camera
 } from 'lucide-react';
 import { Book, Loan, MobileTab } from '../types';
 import { Logo } from './Logo';
 import { useTheme } from '../context/ThemeContext';
+import { getCategoryColor } from '../data/mockData';
 
 interface MobileSimulatorProps {
   books: Book[];
   loans: Loan[];
   onSelectBook: (book: Book) => void;
+  onOpenRegisterBook?: () => void;
 }
 
 export const MobileSimulator: React.FC<MobileSimulatorProps> = ({
   books,
   loans,
   onSelectBook,
+  onOpenRegisterBook,
 }) => {
   const { isDark } = useTheme();
   const [mobileTab, setMobileTab] = useState<MobileTab>('inicio');
@@ -234,10 +238,19 @@ export const MobileSimulator: React.FC<MobileSimulatorProps> = ({
           {/* SCREEN 2: CATÁLOGO */}
           {mobileTab === 'catalogo' && (
             <div className="space-y-3 animate-in fade-in duration-150">
-              <div className="pt-1">
+              <div className="pt-1 flex items-center justify-between">
                 <h3 className="text-base font-extrabold text-white">
                   Catálogo de Livros
                 </h3>
+                {onOpenRegisterBook && (
+                  <button
+                    onClick={onOpenRegisterBook}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold flex items-center gap-1 shadow-sm cursor-pointer active:scale-95"
+                  >
+                    <Camera className="w-3 h-3" />
+                    <span>Cadastrar</span>
+                  </button>
+                )}
               </div>
 
               {/* Search */}
@@ -254,19 +267,25 @@ export const MobileSimulator: React.FC<MobileSimulatorProps> = ({
 
               {/* Categories Pills */}
               <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar text-[10px]">
-                {['Todos', 'Literatura', 'Aventura', 'Ficção'].map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setMobileCategory(c)}
-                    className={`px-2.5 py-1 rounded-full font-semibold whitespace-nowrap cursor-pointer ${
-                      mobileCategory === c
-                        ? 'bg-[#23c65e] text-white'
-                        : 'bg-[#092032] text-slate-400 border border-[#163650]'
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
+                {['Todos', 'Literatura', 'Aventura', 'Ficção'].map((c, idx) => {
+                  const color = getCategoryColor(c, idx);
+                  const isSelected = mobileCategory === c;
+                  return (
+                    <button
+                      key={c}
+                      onClick={() => setMobileCategory(c)}
+                      className={`px-2.5 py-1 rounded-lg font-bold whitespace-nowrap cursor-pointer transition-all duration-150 ${
+                        color.bg
+                      } ${color.hover} text-white ${
+                        isSelected
+                          ? 'scale-105 shadow-md ring-1.5 ring-white opacity-100'
+                          : 'opacity-85 hover:opacity-100'
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Vertical list of books */}

@@ -47,6 +47,7 @@ import { AuditLogView } from './AuditLogView';
 import { AdminUserModal } from './AdminUserModal';
 import { ADMIN_AVATAR_OPTIONS } from '../data/adminAvatars';
 import { useTheme } from '../context/ThemeContext';
+import { getCategoryColor } from '../data/mockData';
 
 interface AdminDashboardProps {
   books: Book[];
@@ -1010,9 +1011,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           </td>
                           <td className={`py-3 px-4 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>{book.author}</td>
                           <td className="py-3 px-4">
-                            <span className={`px-2 py-0.5 rounded-md text-[11px] font-medium border ${
-                              isDark ? 'bg-[#001424] text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            }`}>
+                            <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold text-white shadow-xs ${getCategoryColor(book.category).bg}`}>
                               {book.category}
                             </span>
                           </td>
