@@ -1641,9 +1641,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           <span className={`text-xs font-medium block ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>por {sug.author}</span>
                         </div>
 
-                        <div className={`text-xs p-3 rounded-xl border italic leading-relaxed ${
-                          isDark ? 'text-slate-300 bg-[#001424] border-[#163650]' : 'text-slate-700 bg-slate-50 border-slate-200'
-                        }`}>
+                        <div className="text-xs sm:text-sm p-3.5 rounded-xl border italic leading-relaxed bg-white text-slate-900 border-slate-200 shadow-sm font-normal">
                           "{sug.reason || 'Sem justificativa adicional informada.'}"
                         </div>
                       </div>

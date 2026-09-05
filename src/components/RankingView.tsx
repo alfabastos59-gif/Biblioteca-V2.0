@@ -16,10 +16,12 @@ import {
   Share2,
   Printer,
   ChevronRight,
-  Star
+  Star,
+  Cat
 } from 'lucide-react';
 import { Book, Loan, Student } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { loadScoresMap } from '../utils/quiterioScores';
 
 interface RankingViewProps {
   books: Book[];
@@ -28,6 +30,7 @@ interface RankingViewProps {
   onSelectBook: (book: Book) => void;
   onBackToHome?: () => void;
   onSelectStudent?: (student: Student) => void;
+  onNavigateToQuiterio?: () => void;
 }
 
 export const RankingView: React.FC<RankingViewProps> = ({
@@ -36,6 +39,7 @@ export const RankingView: React.FC<RankingViewProps> = ({
   students,
   onSelectBook,
   onBackToHome,
+  onNavigateToQuiterio,
 }) => {
   const { isDark } = useTheme();
 
@@ -56,6 +60,7 @@ export const RankingView: React.FC<RankingViewProps> = ({
 
   // Dynamic Student Ranking Calculation
   const fullStudentRanking = useMemo(() => {
+    const scoresMap = loadScoresMap();
     return students
       .map((student) => {
         const studentLoans = loans.filter((l) => {
@@ -68,14 +73,26 @@ export const RankingView: React.FC<RankingViewProps> = ({
         const calculatedCount = studentLoans.length;
         const totalCount = Math.max(calculatedCount, student.totalLoansCount || 0);
 
+        // Find Missão Quitério points
+        const cleanCode = (student.studentCode || '').toLowerCase().replace(/^alu-/, '');
+        const scoreData =
+          scoresMap[cleanCode] ||
+          scoresMap[student.name.toLowerCase()] ||
+          scoresMap[student.id];
+        const quiterioScore = scoreData ? scoreData.score : 0;
+        const totalPoints = totalCount * 100 + quiterioScore;
+
         return {
           ...student,
           totalCount,
+          quiterioScore,
+          totalPoints,
           activeLoans: studentLoans.filter((l) => l.status === 'em_andamento' || l.status === 'atrasado').length,
           returnedLoans: studentLoans.filter((l) => l.status === 'devolvido').length,
         };
       })
       .sort((a, b) => {
+        if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
         if (b.totalCount !== a.totalCount) return b.totalCount - a.totalCount;
         return a.name.localeCompare(b.name);
       });
@@ -200,6 +217,37 @@ export const RankingView: React.FC<RankingViewProps> = ({
         </div>
 
         {/* ===================================================================== */}
+        {/* BANNER ESPECIAL MISSÃO QUITÉRIO                                       */}
+        {/* ===================================================================== */}
+        {onNavigateToQuiterio && (
+          <div className="mb-8 p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500/20 via-indigo-500/20 to-purple-500/20 border-2 border-amber-400/50 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5 text-center sm:text-left">
+              <div className="w-12 h-12 rounded-2xl bg-amber-400 text-amber-950 flex items-center justify-center shadow-md flex-shrink-0">
+                <Cat className="w-7 h-7" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-black text-amber-400 flex items-center gap-1.5 justify-center sm:justify-start">
+                  <span>Missão Quitério: Desafio do Conhecimento</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400 text-amber-950 font-bold uppercase">
+                    Novo
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-300 mt-0.5">
+                  Responda perguntas sobre os livros que você retirou na biblioteca, acumule pontos e suba no Ranking da Escola!
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onNavigateToQuiterio}
+              className="px-5 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs sm:text-sm shadow-md flex items-center gap-2 cursor-pointer transition-all hover:scale-105 flex-shrink-0"
+            >
+              <span>Jogar Missão Quitério 🐾</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* ===================================================================== */}
         {/* PODIUM DOS CAMPEÕES DE LEITURA (TOP 3 ALUNOS)                         */}
         {/* ===================================================================== */}
         <div className="mb-10">
@@ -232,8 +280,13 @@ export const RankingView: React.FC<RankingViewProps> = ({
                   {top2.name}
                 </h3>
                 <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{top2.class}</p>
-                <div className="mt-3 py-1.5 px-3 rounded-xl bg-slate-500/10 text-slate-300 inline-block font-bold text-xs">
-                  🥈 {top2.totalCount} {top2.totalCount === 1 ? 'livro lido' : 'livros lidos'}
+                <div className="mt-3 py-1.5 px-3 rounded-xl bg-slate-500/10 text-slate-300 inline-flex flex-col items-center gap-0.5 font-bold text-xs">
+                  <span>🥈 {top2.totalCount} {top2.totalCount === 1 ? 'livro lido' : 'livros lidos'}</span>
+                  {top2.quiterioScore > 0 && (
+                    <span className="text-[10px] text-amber-400 font-extrabold flex items-center gap-1">
+                      <Cat className="w-3 h-3" /> +{top2.quiterioScore} pts
+                    </span>
+                  )}
                 </div>
               </div>
             )}
@@ -264,8 +317,13 @@ export const RankingView: React.FC<RankingViewProps> = ({
                 <p className={`text-xs font-semibold ${isDark ? 'text-amber-400' : 'text-amber-700'}`}>
                   Turma {top1.class}
                 </p>
-                <div className="mt-3.5 py-2 px-4 rounded-xl bg-amber-500 text-slate-950 font-black text-sm inline-block shadow-md">
-                  🥇 {top1.totalCount} {top1.totalCount === 1 ? 'livro emprestado' : 'livros emprestados'}
+                <div className="mt-3.5 py-2 px-4 rounded-xl bg-amber-500 text-slate-950 font-black text-sm inline-flex flex-col items-center gap-0.5 shadow-md">
+                  <span>🥇 {top1.totalCount} {top1.totalCount === 1 ? 'livro emprestado' : 'livros emprestados'}</span>
+                  {top1.quiterioScore > 0 && (
+                    <span className="text-[10px] bg-amber-950/20 text-amber-950 font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Cat className="w-3 h-3" /> Missão: +{top1.quiterioScore} pts
+                    </span>
+                  )}
                 </div>
               </div>
             )}
@@ -291,8 +349,13 @@ export const RankingView: React.FC<RankingViewProps> = ({
                   {top3.name}
                 </h3>
                 <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{top3.class}</p>
-                <div className="mt-3 py-1.5 px-3 rounded-xl bg-amber-600/10 text-amber-500 inline-block font-bold text-xs">
-                  🥉 {top3.totalCount} {top3.totalCount === 1 ? 'livro lido' : 'livros lidos'}
+                <div className="mt-3 py-1.5 px-3 rounded-xl bg-amber-600/10 text-amber-500 inline-flex flex-col items-center gap-0.5 font-bold text-xs">
+                  <span>🥉 {top3.totalCount} {top3.totalCount === 1 ? 'livro lido' : 'livros lidos'}</span>
+                  {top3.quiterioScore > 0 && (
+                    <span className="text-[10px] text-amber-400 font-extrabold flex items-center gap-1">
+                      <Cat className="w-3 h-3" /> +{top3.quiterioScore} pts
+                    </span>
+                  )}
                 </div>
               </div>
             )}
@@ -407,10 +470,15 @@ export const RankingView: React.FC<RankingViewProps> = ({
                         </div>
                       </div>
 
-                      <div className="shrink-0 pl-2">
-                        <span className={`text-xs font-bold ${pos === 1 ? 'text-amber-400' : isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                      <div className="shrink-0 pl-2 text-right">
+                        <span className={`text-xs font-bold block ${pos === 1 ? 'text-amber-400' : isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                           {st.totalCount} {st.totalCount === 1 ? 'livro' : 'livros'}
                         </span>
+                        {st.quiterioScore > 0 && (
+                          <span className="text-[10px] text-amber-400 font-bold flex items-center justify-end gap-1">
+                            <Cat className="w-3 h-3" /> +{st.quiterioScore} pts
+                          </span>
+                        )}
                       </div>
                     </div>
                   );
@@ -545,6 +613,7 @@ export const RankingView: React.FC<RankingViewProps> = ({
                     <th className="py-3 px-3">Turma</th>
                     <th className="py-3 px-3 text-center">Em Andamento</th>
                     <th className="py-3 px-3 text-center">Devolvidos</th>
+                    <th className="py-3 px-3 text-center">Missão Quitério</th>
                     <th className="py-3 px-3 text-right">Total de Leituras</th>
                   </tr>
                 </thead>
@@ -583,6 +652,15 @@ export const RankingView: React.FC<RankingViewProps> = ({
                         </td>
                         <td className="py-3 px-3 text-center font-semibold text-emerald-400">
                           {st.returnedLoans}
+                        </td>
+                        <td className="py-3 px-3 text-center font-semibold text-amber-400">
+                          {st.quiterioScore > 0 ? (
+                            <span className="inline-flex items-center gap-1 font-bold text-amber-400">
+                              <Cat className="w-3.5 h-3.5" /> +{st.quiterioScore} pts
+                            </span>
+                          ) : (
+                            <span className="text-slate-500 text-xs">-</span>
+                          )}
                         </td>
                         <td className="py-3 px-3 text-right font-black text-emerald-400 text-sm">
                           {st.totalCount}

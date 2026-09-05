@@ -123,7 +123,7 @@ export interface AuditLog {
   targetName?: string;
 }
 
-export type ActiveTab = 'inicio' | 'catalogo' | 'ranking' | 'emprestimos' | 'sugestoes' | 'sobre' | 'admin' | 'relatorios' | 'mobile_view' | 'meu_historico';
+export type ActiveTab = 'inicio' | 'catalogo' | 'ranking' | 'emprestimos' | 'sugestoes' | 'sobre' | 'admin' | 'relatorios' | 'mobile_view' | 'meu_historico' | 'missao_quiterio';
 export type AdminSection = 'dashboard' | 'emprestimos' | 'livros' | 'alunos' | 'sugestoes' | 'usuarios_adm' | 'auditoria' | 'relatorios' | 'backup' | 'configuracoes' | 'carteirinhas';
 export type MobileTab = 'inicio' | 'catalogo' | 'emprestimos' | 'perfil';
 

@@ -3,6 +3,25 @@ import { ADMIN_AVATAR_OPTIONS } from './adminAvatars';
 
 export const INITIAL_BOOKS: Book[] = [
   {
+    id: "pequeno-principe-quiterio",
+    title: "O Pequeno Príncipe",
+    author: "Antoine de Saint-Exupéry",
+    cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&auto=format&fit=crop&q=80",
+    category: "Literatura Infantojuvenil",
+    rating: 5.0,
+    reviewsCount: 38,
+    status: "disponivel",
+    pages: 96,
+    year: 1943,
+    publisher: "Editora Agir",
+    location: "Estante 01 - Prateleira A (Destaque)",
+    synopsis: "Um piloto cai no deserto do Saara e encontra um jovem príncipe de cabelos dourados vindo de um minúsculo asteroide. Uma fábula poética sobre o amor, a amizade e o verdadeiro sentido da vida.",
+    isbn: "978-8522031474",
+    totalCopies: 3,
+    availableCopies: 2,
+    featured: true
+  },
+  {
     id: "a790a14d-90e1-496e-a25d-21c281aac765",
     title: "Crônicas Para Jovens",
     author: "Rubem Braga",

@@ -13,7 +13,8 @@ import {
   Moon,
   Trophy,
   Palette,
-  Sparkles
+  Sparkles,
+  Cat
 } from 'lucide-react';
 import { ActiveTab, UserSession } from '../types';
 import { Logo } from './Logo';
@@ -134,6 +135,27 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Trophy className="w-3.5 h-3.5 text-amber-400" />
               <span>Ranking</span>
+            </button>
+
+            {/* MISSÃO QUITÉRIO (Quiz Game Mascot Tab) */}
+            <button
+              id="nav-missao-quiterio"
+              onClick={() => setActiveTab('missao_quiterio')}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'missao_quiterio'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow-[0_0_15px_rgba(245,158,11,0.5)] scale-105'
+                  : isKinetic
+                  ? 'text-amber-400 hover:text-amber-300 hover:bg-[#2a313a]'
+                  : isDark
+                  ? 'text-amber-400 hover:text-amber-300 hover:bg-amber-400/10'
+                  : 'text-amber-700 hover:text-amber-800 hover:bg-amber-100/80 font-semibold'
+              }`}
+            >
+              <Cat className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+              <span>Missão Quitério</span>
+              <span className="ml-0.5 text-[9px] px-1.5 py-0.2 rounded-full bg-amber-400/20 text-amber-500 dark:text-amber-300 font-bold border border-amber-400/30">
+                Jogo
+              </span>
             </button>
 
             {/* If logged in as student, show "Meu Histórico" */}
@@ -523,6 +545,27 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Trophy className="w-4 h-4 text-amber-400" />
               <span>Ranking</span>
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('missao_quiterio');
+                setMobileMenuOpen(false);
+              }}
+              className={`p-2.5 rounded-xl text-sm font-medium text-left flex items-center justify-between ${
+                activeTab === 'missao_quiterio'
+                  ? 'bg-amber-500 text-slate-950 font-bold'
+                  : isDark
+                  ? 'bg-[#092032] text-amber-400'
+                  : 'bg-amber-50 border border-amber-200 text-amber-800'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Cat className="w-4 h-4 text-amber-500" />
+                <span>Missão Quitério</span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400 text-amber-950 font-black">
+                JOGO
+              </span>
             </button>
             {isStudent && (
               <button

@@ -154,9 +154,7 @@ export const SuggestionsView: React.FC<SuggestionsViewProps> = ({
               <p className={`text-xs font-medium mb-3 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>por {item.author}</p>
 
               <div
-                className={`p-3 rounded-xl border text-xs mb-4 leading-relaxed ${
-                  isDark ? 'bg-[#031320] border-[#163650] text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-600'
-                }`}
+                className="p-3.5 rounded-xl border text-xs sm:text-sm mb-4 leading-relaxed bg-white text-slate-900 border-slate-200 shadow-sm font-normal"
               >
                 "{item.reason || 'Livro recomendado para o acervo.'}"
               </div>

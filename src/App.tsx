@@ -15,6 +15,7 @@ import { ManageBooksModal } from './components/ManageBooksModal';
 import { AuthModal } from './components/AuthModal';
 import { StudentPortalView } from './components/StudentPortalView';
 import { RankingView } from './components/RankingView';
+import { MissaoQuiterioView } from './components/MissaoQuiterioView';
 import { Footer } from './components/Footer';
 
 import {
@@ -697,6 +698,7 @@ export default function App() {
               onSelectBook={handleSelectBook}
               onViewCatalog={() => setActiveTab('catalogo')}
               onViewRanking={() => setActiveTab('ranking')}
+              onViewMissaoQuiterio={() => setActiveTab('missao_quiterio')}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               onSearchSubmit={handleSearchSubmit}
@@ -727,6 +729,21 @@ export default function App() {
             loans={loans}
             students={students}
             onSelectBook={handleSelectBook}
+            onBackToHome={() => setActiveTab('inicio')}
+            onNavigateToQuiterio={() => setActiveTab('missao_quiterio')}
+          />
+        )}
+
+        {/* TAB: MISSÃO QUITÉRIO (Jogo de Perguntas Literárias) */}
+        {activeTab === 'missao_quiterio' && (
+          <MissaoQuiterioView
+            books={books}
+            loans={loans}
+            students={students}
+            currentSession={session}
+            onSelectBook={handleSelectBook}
+            onNavigateToCatalog={() => setActiveTab('catalogo')}
+            onNavigateToRanking={() => setActiveTab('ranking')}
             onBackToHome={() => setActiveTab('inicio')}
           />
         )}
@@ -871,7 +888,7 @@ export default function App() {
       />
 
       {/* Footer */}
-      {activeTab !== 'admin' && (
+      {activeTab !== 'admin' && activeTab !== 'missao-quiterio' && (
         <Footer
           setActiveTab={handleNavigateTab}
           onOpenDesignSystem={() => setIsDesignSystemOpen(true)}

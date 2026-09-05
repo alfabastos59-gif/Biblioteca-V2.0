@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, BookOpen, Users, RefreshCw, BarChart3, ChevronRight, Star } from 'lucide-react';
+import { Search, BookOpen, Users, RefreshCw, BarChart3, ChevronRight, Star, Cat } from 'lucide-react';
 import { Book, Loan, Student } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { HomeRankingWidget } from './HomeRankingWidget';
@@ -11,6 +11,7 @@ interface HeroBannerProps {
   onSelectBook: (book: Book) => void;
   onViewCatalog: () => void;
   onViewRanking?: () => void;
+  onViewMissaoQuiterio?: () => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
   onSearchSubmit: (e: React.FormEvent) => void;
@@ -23,6 +24,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   onSelectBook,
   onViewCatalog,
   onViewRanking,
+  onViewMissaoQuiterio,
   searchQuery,
   setSearchQuery,
   onSearchSubmit,
@@ -78,6 +80,26 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               />
               <span>Colégio Estadual do Campo Maria Quitéria - TI</span>
             </div>
+
+            {/* Missão Quitério Game Chip */}
+            {onViewMissaoQuiterio && (
+              <div>
+                <button
+                  id="btn-hero-missao-quiterio"
+                  onClick={onViewMissaoQuiterio}
+                  className="mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-indigo-500/20 to-purple-500/20 border border-amber-400/60 hover:border-amber-400 text-amber-300 text-xs sm:text-sm font-bold shadow-md hover:scale-105 transition-all cursor-pointer group"
+                >
+                  <span className="p-1 rounded-full bg-amber-400 text-amber-950">
+                    <Cat className="w-3.5 h-3.5" />
+                  </span>
+                  <span>Missão Quitério: Jogo de Perguntas Literárias 🐾</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400 text-amber-950 font-black">
+                    JOGAR
+                  </span>
+                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              </div>
+            )}
 
             {/* Title & Subtitle */}
             <h1
