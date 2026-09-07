@@ -17,7 +17,11 @@ import {
   Printer,
   ChevronRight,
   Star,
-  Cat
+  Cat,
+  Target,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { Book, Loan, Student } from '../types';
 import { useTheme } from '../context/ThemeContext';
@@ -48,6 +52,59 @@ export const RankingView: React.FC<RankingViewProps> = ({
   const [searchStudent, setSearchStudent] = useState<string>('');
   const [searchBook, setSearchBook] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'geral' | 'alunos' | 'livros'>('geral');
+  const [showAllQuiterio, setShowAllQuiterio] = useState<boolean>(false);
+
+  // Dynamic calculation of students who answered Missão Quitério challenges
+  const quiterioAchievers = useMemo(() => {
+    const scoresMap = loadScoresMap();
+    const list = Object.values(scoresMap)
+      .filter((s) => s.score > 0 || (s.correctAnswers && s.correctAnswers > 0) || (s.totalAnswered && s.totalAnswered > 0))
+      .map((item) => {
+        const cleanCode = (item.studentCode || item.studentId || '').toLowerCase().replace(/^alu-/, '');
+        const matchedStudent = students.find((s) => {
+          const sCleanCode = (s.studentCode || '').toLowerCase().replace(/^alu-/, '');
+          return sCleanCode === cleanCode || s.name.toLowerCase() === item.studentName.toLowerCase();
+        });
+
+        const booksAnswered =
+          item.completedBooks && item.completedBooks.length > 0
+            ? item.completedBooks
+            : item.bookScores
+            ? Object.keys(item.bookScores)
+            : [];
+
+        return {
+          id: item.studentId,
+          code: matchedStudent?.studentCode
+            ? `ALU-${matchedStudent.studentCode.replace(/^ALU-/, '')}`
+            : item.studentCode
+            ? (item.studentCode.startsWith('ALU-') ? item.studentCode : `ALU-${item.studentCode}`)
+            : `ALU-${item.studentId.toUpperCase()}`,
+          name: matchedStudent?.name || item.studentName,
+          className: matchedStudent?.class || 'Ensino Fundamental/Médio',
+          avatar:
+            matchedStudent?.avatar ||
+            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+          score: item.score,
+          correctAnswers: item.correctAnswers || 0,
+          totalAnswered: item.totalAnswered || Math.max(item.correctAnswers || 0, 1),
+          attemptsCount: item.attemptsCount || 1,
+          booksAnswered,
+          bookScores: item.bookScores,
+        };
+      })
+      .sort((a, b) => b.score - a.score);
+
+    return list;
+  }, [students]);
+
+  const totalUniqueBooksAnswered = useMemo(() => {
+    const booksSet = new Set<string>();
+    quiterioAchievers.forEach((achiever) => {
+      achiever.booksAnswered.forEach((bk) => booksSet.add(bk));
+    });
+    return booksSet.size > 0 ? booksSet.size : 1;
+  }, [quiterioAchievers]);
 
   // Available classes
   const classesList = useMemo(() => {
@@ -217,33 +274,293 @@ export const RankingView: React.FC<RankingViewProps> = ({
         </div>
 
         {/* ===================================================================== */}
-        {/* BANNER ESPECIAL MISSÃO QUITÉRIO                                       */}
+        {/* PAINEL: ALUNOS QUE CONSEGUIRAM RESPONDER À MISSÃO QUITÉRIO             */}
         {/* ===================================================================== */}
         {onNavigateToQuiterio && (
-          <div className="mb-8 p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500/20 via-indigo-500/20 to-purple-500/20 border-2 border-amber-400/50 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5 text-center sm:text-left">
-              <div className="w-12 h-12 rounded-2xl bg-amber-400 text-amber-950 flex items-center justify-center shadow-md flex-shrink-0">
-                <Cat className="w-7 h-7" />
+          <div
+            id="painel-alunos-missao-quiterio"
+            className={`mb-10 rounded-3xl p-5 sm:p-7 border-2 transition-all shadow-2xl relative overflow-hidden ${
+              isDark
+                ? 'bg-gradient-to-br from-[#0c0f2b] via-[#14123b] to-[#251336] border-amber-400/60 shadow-[0_12px_36px_rgba(0,0,0,0.6),0_0_25px_rgba(245,158,11,0.12)] text-white'
+                : 'bg-gradient-to-br from-[#fffbeb] via-[#fef3c7] to-[#f3e8ff] border-amber-400/80 shadow-xl text-slate-900'
+            }`}
+          >
+            {/* Ambient Background Glows */}
+            <div className="absolute -top-24 -right-24 w-72 h-72 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Header: Cat Icon + Title + Action CTA */}
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-amber-400/20">
+              <div className="flex items-start sm:items-center gap-3.5">
+                <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 border-2 border-amber-200 border-b-4 border-orange-700 text-amber-950 flex items-center justify-center shadow-lg flex-shrink-0">
+                  <Cat className="w-7 h-7 sm:w-8 sm:h-8" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 dark:text-amber-300 text-amber-900 font-extrabold uppercase tracking-wider border border-amber-400/40">
+                      🐾 Desafio Literário do Mascote
+                    </span>
+                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/40 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      <span>{quiterioAchievers.length} {quiterioAchievers.length === 1 ? 'aluno respondeu' : 'alunos responderam'}</span>
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black mt-1 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 drop-shadow-sm">
+                    Alunos que Responderam à Missão Quitério
+                  </h3>
+                  <p className={`text-xs sm:text-sm mt-0.5 max-w-2xl ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                    Estudantes que aceitaram o quiz literário do Quitério, responderam às perguntas sobre as obras e conquistaram pontos de sabedoria!
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-black text-amber-400 flex items-center gap-1.5 justify-center sm:justify-start">
-                  <span>Missão Quitério: Desafio do Conhecimento</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400 text-amber-950 font-bold uppercase">
-                    Novo
+
+              {/* Botão Jogar Missão Quitério */}
+              <button
+                id="btn-jogar-missao-quiterio-painel"
+                type="button"
+                onClick={onNavigateToQuiterio}
+                className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-amber-950 font-black text-xs sm:text-sm shadow-[0_4px_0_#9a3412] active:translate-y-0.5 border-2 border-amber-200 flex items-center justify-center gap-2 cursor-pointer transition-all flex-shrink-0"
+              >
+                <span>Jogar Missão Quitério 🐾</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Metric Summary Bar */}
+            <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 my-4">
+              <div className={`p-3 rounded-2xl border flex items-center gap-2.5 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/70 border-amber-200'}`}>
+                <div className="w-8 h-8 rounded-xl bg-amber-400/20 text-amber-500 dark:text-amber-300 flex items-center justify-center shrink-0">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className={`text-[10px] uppercase font-bold block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Alunos no Jogo</span>
+                  <span className={`text-sm sm:text-base font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{quiterioAchievers.length} Estudantes</span>
+                </div>
+              </div>
+
+              <div className={`p-3 rounded-2xl border flex items-center gap-2.5 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/70 border-amber-200'}`}>
+                <div className="w-8 h-8 rounded-xl bg-yellow-400/20 text-yellow-500 dark:text-yellow-300 flex items-center justify-center shrink-0">
+                  <Star className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className={`text-[10px] uppercase font-bold block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Pontos Conquistados</span>
+                  <span className="text-sm sm:text-base font-extrabold text-amber-500 dark:text-amber-300">
+                    {quiterioAchievers.reduce((sum, s) => sum + s.score, 0).toLocaleString()} pts
                   </span>
-                </h3>
-                <p className="text-xs text-slate-300 mt-0.5">
-                  Responda perguntas sobre os livros que você retirou na biblioteca, acumule pontos e suba no Ranking da Escola!
-                </p>
+                </div>
+              </div>
+
+              <div className={`p-3 rounded-2xl border flex items-center gap-2.5 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/70 border-amber-200'}`}>
+                <div className="w-8 h-8 rounded-xl bg-emerald-400/20 text-emerald-600 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                  <Target className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className={`text-[10px] uppercase font-bold block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Perguntas Acertadas</span>
+                  <span className="text-sm sm:text-base font-extrabold text-emerald-600 dark:text-emerald-300">
+                    {quiterioAchievers.reduce((sum, s) => sum + s.correctAnswers, 0)} acertos
+                  </span>
+                </div>
+              </div>
+
+              <div className={`p-3 rounded-2xl border flex items-center gap-2.5 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/70 border-amber-200'}`}>
+                <div className="w-8 h-8 rounded-xl bg-purple-400/20 text-purple-600 dark:text-purple-300 flex items-center justify-center shrink-0">
+                  <BookOpen className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className={`text-[10px] uppercase font-bold block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Livros Desafiados</span>
+                  <span className={`text-sm sm:text-base font-extrabold ${isDark ? 'text-purple-200' : 'text-purple-800'}`}>
+                    {totalUniqueBooksAnswered} {totalUniqueBooksAnswered === 1 ? 'livro' : 'livros'}
+                  </span>
+                </div>
               </div>
             </div>
-            <button
-              onClick={onNavigateToQuiterio}
-              className="px-5 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs sm:text-sm shadow-md flex items-center gap-2 cursor-pointer transition-all hover:scale-105 flex-shrink-0"
-            >
-              <span>Jogar Missão Quitério 🐾</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
+
+            {/* Students Showcase Cards */}
+            {quiterioAchievers.length === 0 ? (
+              <div className="relative z-10 text-center py-8 rounded-2xl bg-white/5 border border-white/10">
+                <Cat className="w-12 h-12 text-amber-400 mx-auto mb-2 opacity-60" />
+                <h4 className="text-base font-bold text-white">Nenhum aluno respondeu aos desafios ainda!</h4>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 mb-4">
+                  Seja o primeiro a encarar as perguntas do Quitério sobre os livros da biblioteca e apareça aqui!
+                </p>
+                <button
+                  type="button"
+                  onClick={onNavigateToQuiterio}
+                  className="px-4 py-2 rounded-xl bg-amber-400 text-amber-950 font-bold text-xs"
+                >
+                  Iniciar Primeiro Desafio
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-4">
+                  {(showAllQuiterio ? quiterioAchievers : quiterioAchievers.slice(0, 4)).map((student, idx) => {
+                    const rank = idx + 1;
+                    const isTop1 = rank === 1;
+                    const isTop2 = rank === 2;
+                    const isTop3 = rank === 3;
+
+                    return (
+                      <div
+                        key={student.id || idx}
+                        className={`rounded-2xl p-4 border transition-all duration-200 flex flex-col justify-between ${
+                          isTop1
+                            ? isDark
+                              ? 'bg-gradient-to-b from-amber-500/20 via-amber-950/40 to-slate-950/80 border-amber-400 shadow-[0_4px_20px_rgba(245,158,11,0.25)]'
+                              : 'bg-gradient-to-b from-amber-100 via-amber-50 to-white border-amber-400 shadow-md'
+                            : isTop2
+                            ? isDark
+                              ? 'bg-gradient-to-b from-slate-400/15 via-slate-900/50 to-slate-950/80 border-slate-300 shadow-md'
+                              : 'bg-gradient-to-b from-slate-100 via-white to-white border-slate-300 shadow-sm'
+                            : isTop3
+                            ? isDark
+                              ? 'bg-gradient-to-b from-amber-700/20 via-orange-950/40 to-slate-950/80 border-amber-600 shadow-md'
+                              : 'bg-gradient-to-b from-orange-50 via-white to-white border-orange-300 shadow-sm'
+                            : isDark
+                            ? 'bg-slate-900/70 border-white/10 hover:border-amber-400/40'
+                            : 'bg-white border-amber-200/80 hover:border-amber-400 shadow-xs'
+                        }`}
+                      >
+                        {/* Top: Rank Position & Attempt Badge */}
+                        <div className="flex items-center justify-between gap-2 mb-3">
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-xs font-black shadow-xs flex items-center gap-1 ${
+                              isTop1
+                                ? 'bg-amber-400 text-amber-950'
+                                : isTop2
+                                ? 'bg-slate-200 text-slate-800'
+                                : isTop3
+                                ? 'bg-amber-600 text-white'
+                                : isDark
+                                ? 'bg-purple-950/80 text-purple-300 border border-purple-800'
+                                : 'bg-purple-100 text-purple-900 border border-purple-200'
+                            }`}
+                          >
+                            <span>
+                              {isTop1 ? '🥇 1º Lugar' : isTop2 ? '🥈 2º Lugar' : isTop3 ? '🥉 3º Lugar' : `🐾 ${rank}º Lugar`}
+                            </span>
+                          </span>
+
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${isDark ? 'bg-white/10 text-amber-300' : 'bg-amber-100 text-amber-900'}`}>
+                            🐾 {student.attemptsCount}/5 jogadas
+                          </span>
+                        </div>
+
+                        {/* Student Info: Avatar + Name + Class */}
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="relative flex-shrink-0">
+                            <img
+                              src={student.avatar}
+                              alt={student.name}
+                              className={`w-12 h-12 rounded-full object-cover border-2 ${
+                                isTop1
+                                  ? 'border-amber-400 shadow-md ring-2 ring-amber-400/40'
+                                  : isTop2
+                                  ? 'border-slate-300'
+                                  : isTop3
+                                  ? 'border-amber-600'
+                                  : 'border-purple-400/50'
+                              }`}
+                            />
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-400 text-amber-950 text-[10px] font-black flex items-center justify-center shadow">
+                              🐾
+                            </div>
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <h4 className={`text-sm font-extrabold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                              {student.name}
+                            </h4>
+                            <p className={`text-xs truncate ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                              {student.className}
+                            </p>
+                            <span className={`text-[10px] font-mono block ${isDark ? 'text-amber-400/80' : 'text-amber-700'}`}>
+                              {student.code}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Metrics: Points & Accuracy */}
+                        <div className={`p-2.5 rounded-xl mb-2.5 flex items-center justify-between text-xs ${isDark ? 'bg-black/30 border border-white/5' : 'bg-amber-50/80 border border-amber-200/60'}`}>
+                          <div>
+                            <span className={`text-[10px] font-semibold block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Pontuação</span>
+                            <span className="font-black text-amber-500 dark:text-amber-300 text-sm flex items-center gap-1">
+                              <Star className="w-3.5 h-3.5 fill-current" />
+                              <span>{student.score.toLocaleString()} pts</span>
+                            </span>
+                          </div>
+
+                          <div className="text-right">
+                            <span className={`text-[10px] font-semibold block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Acertos</span>
+                            <span className="font-bold text-emerald-600 dark:text-emerald-400 text-xs flex items-center gap-1 justify-end">
+                              <Target className="w-3 h-3" />
+                              <span>{student.correctAnswers} certas</span>
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Books Answered */}
+                        <div className="pt-2 border-t border-white/10 text-[11px]">
+                          <span className={`text-[10px] font-bold block mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                            📖 Livro(s) Respondido(s):
+                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {student.booksAnswered.length > 0 ? (
+                              student.booksAnswered.slice(0, 2).map((bk, bIdx) => (
+                                <span
+                                  key={bIdx}
+                                  className={`px-2 py-0.5 rounded-md font-semibold text-[10px] truncate max-w-[170px] ${
+                                    isDark ? 'bg-purple-950/60 text-purple-200 border border-purple-800/60' : 'bg-purple-100 text-purple-900 border border-purple-200'
+                                  }`}
+                                  title={bk}
+                                >
+                                  {bk}
+                                </span>
+                              ))
+                            ) : (
+                              <span className={`text-[10px] italic ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                                Quiz Geral
+                              </span>
+                            )}
+                            {student.booksAnswered.length > 2 && (
+                              <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${isDark ? 'bg-white/10 text-slate-300' : 'bg-slate-200 text-slate-700'}`}>
+                                +{student.booksAnswered.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* View More / View Less Toggle if more than 4 students */}
+                {quiterioAchievers.length > 4 && (
+                  <div className="relative z-10 flex justify-center mt-5">
+                    <button
+                      type="button"
+                      onClick={() => setShowAllQuiterio((prev) => !prev)}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${
+                        isDark
+                          ? 'bg-slate-900/80 hover:bg-slate-800 text-amber-300 border-amber-400/30'
+                          : 'bg-white hover:bg-amber-50 text-amber-900 border-amber-300 shadow-sm'
+                      }`}
+                    >
+                      <span>
+                        {showAllQuiterio
+                          ? 'Mostrar menos alunos'
+                          : `Ver todos os ${quiterioAchievers.length} alunos que responderam`}
+                      </span>
+                      {showAllQuiterio ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
 
