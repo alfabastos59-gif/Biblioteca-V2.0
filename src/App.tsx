@@ -32,22 +32,30 @@ import { useTheme } from './context/ThemeContext';
 
 export default function App() {
   const { isDark, isKinetic, isOcean } = useTheme();
-  const DB_VERSION = 'bmq_db_v9_25_avatars';
+  const DB_VERSION = 'bmq_db_v10_ordem_alfabetica';
 
   const [books, setBooks] = useState<Book[]>(() => {
     const version = localStorage.getItem('bmq_db_version');
+    const sortedInitBooks = [...INITIAL_BOOKS].sort((a, b) =>
+      a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' })
+    );
+    const sortedInitStudents = [...INITIAL_STUDENTS].sort((a, b) =>
+      a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' })
+    );
+
     if (version !== DB_VERSION) {
       localStorage.setItem('bmq_db_version', DB_VERSION);
-      localStorage.setItem('bmq_books', JSON.stringify(INITIAL_BOOKS));
+      localStorage.setItem('bmq_books', JSON.stringify(sortedInitBooks));
       localStorage.setItem('bmq_loans', JSON.stringify(INITIAL_LOANS));
-      localStorage.setItem('bmq_students', JSON.stringify(INITIAL_STUDENTS));
+      localStorage.setItem('bmq_students', JSON.stringify(sortedInitStudents));
       localStorage.setItem('bmq_suggestions', JSON.stringify(INITIAL_SUGGESTIONS));
       localStorage.setItem('bmq_admin_users', JSON.stringify(INITIAL_ADMIN_USERS));
       localStorage.setItem('bmq_audit_logs', JSON.stringify(INITIAL_AUDIT_LOGS));
-      return INITIAL_BOOKS;
+      return sortedInitBooks;
     }
     const saved = localStorage.getItem('bmq_books');
-    return saved ? JSON.parse(saved) : INITIAL_BOOKS;
+    const parsed: Book[] = saved ? JSON.parse(saved) : sortedInitBooks;
+    return parsed.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
   });
 
   const [loans, setLoans] = useState<Loan[]>(() => {
@@ -64,14 +72,19 @@ export default function App() {
 
   const [students, setStudents] = useState<Student[]>(() => {
     const version = localStorage.getItem('bmq_db_version');
-    if (version !== DB_VERSION) return INITIAL_STUDENTS;
+    const sortedInitStudents = [...INITIAL_STUDENTS].sort((a, b) =>
+      a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' })
+    );
+    if (version !== DB_VERSION) return sortedInitStudents;
     const saved = localStorage.getItem('bmq_students');
-    if (!saved) return INITIAL_STUDENTS;
+    if (!saved) return sortedInitStudents;
     const parsed: Student[] = JSON.parse(saved);
-    return parsed.map((s) => ({
-      ...s,
-      studentCode: s.studentCode ? s.studentCode.replace(/^ALU-/, '') : s.studentCode,
-    }));
+    return parsed
+      .map((s) => ({
+        ...s,
+        studentCode: s.studentCode ? s.studentCode.replace(/^ALU-/, '') : s.studentCode,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
   });
 
   const [suggestions, setSuggestions] = useState<Suggestion[]>(() => {
@@ -428,7 +441,9 @@ export default function App() {
       return;
     }
     setBooks((prev) =>
-      prev.map((b) => (b.id === updatedBook.id ? updatedBook : b))
+      prev
+        .map((b) => (b.id === updatedBook.id ? updatedBook : b))
+        .sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }))
     );
     setLoans((prev) =>
       prev.map((l) =>
@@ -459,7 +474,9 @@ export default function App() {
       handleOpenLogin('admin', 'Cadastrar Novo Livro');
       return;
     }
-    setBooks((prev) => [newBook, ...prev]);
+    setBooks((prev) =>
+      [...prev, newBook].sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }))
+    );
 
     logAuditEvent(
       'livros',
@@ -470,7 +487,9 @@ export default function App() {
   };
 
   const handleRegisterBook = (newBook: Book) => {
-    setBooks((prev) => [newBook, ...prev]);
+    setBooks((prev) =>
+      [...prev, newBook].sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }))
+    );
 
     logAuditEvent(
       'livros',
@@ -505,7 +524,9 @@ export default function App() {
       return;
     }
     setStudents((prev) =>
-      prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
+      prev
+        .map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
+        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }))
     );
     setLoans((prev) =>
       prev.map((l) =>
@@ -533,7 +554,9 @@ export default function App() {
       handleOpenLogin('admin', 'Cadastrar Aluno');
       return;
     }
-    setStudents((prev) => [newStudent, ...prev]);
+    setStudents((prev) =>
+      [...prev, newStudent].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }))
+    );
 
     logAuditEvent(
       'alunos',

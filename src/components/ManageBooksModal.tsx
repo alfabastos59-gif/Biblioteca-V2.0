@@ -42,17 +42,18 @@ export const ManageBooksModal: React.FC<ManageBooksModalProps> = ({
   const [formData, setFormData] = useState<Partial<Book>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Filter books by search term
+  // Filter books by search term and sort alphabetically by title
   const filteredBooks = useMemo(() => {
-    if (!searchTerm.trim()) return books;
-    const term = searchTerm.toLowerCase().trim();
-    return books.filter(
-      (b) =>
-        b.title.toLowerCase().includes(term) ||
-        b.author.toLowerCase().includes(term) ||
-        b.category.toLowerCase().includes(term) ||
-        (b.isbn && b.isbn.toLowerCase().includes(term))
-    );
+    const list = !searchTerm.trim()
+      ? [...books]
+      : books.filter(
+          (b) =>
+            b.title.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+            b.author.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+            b.category.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+            (b.isbn && b.isbn.toLowerCase().includes(searchTerm.toLowerCase().trim()))
+        );
+    return list.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
   }, [books, searchTerm]);
 
   if (!isOpen) return null;

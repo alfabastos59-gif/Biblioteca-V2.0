@@ -41,14 +41,16 @@ export const MobileSimulator: React.FC<MobileSimulatorProps> = ({
   const featured = books.filter((b) => b.featured);
   const activeLoans = loans.filter((l) => l.status !== 'devolvido');
 
-  const filteredBooks = books.filter((b) => {
-    const matchesSearch =
-      b.title.toLowerCase().includes(mobileSearch.toLowerCase()) ||
-      b.author.toLowerCase().includes(mobileSearch.toLowerCase());
-    const matchesCategory =
-      mobileCategory === 'Todos' || b.category === mobileCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredBooks = books
+    .filter((b) => {
+      const matchesSearch =
+        b.title.toLowerCase().includes(mobileSearch.toLowerCase()) ||
+        b.author.toLowerCase().includes(mobileSearch.toLowerCase());
+      const matchesCategory =
+        mobileCategory === 'Todos' || b.category === mobileCategory;
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col items-center">

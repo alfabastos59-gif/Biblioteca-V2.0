@@ -22,7 +22,7 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
   const { isDark } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedStatus, setSelectedStatus] = useState<string>('todos');
-  const [sortBy, setSortBy] = useState<'rating' | 'title' | 'year'>('rating');
+  const [sortBy, setSortBy] = useState<'title' | 'rating' | 'year'>('title');
   const [showFiltersModal, setShowFiltersModal] = useState(false);
 
   // Filter books based on search, category, status and sorting
@@ -44,8 +44,8 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
         return matchesQuery && matchesCategory && matchesStatus;
       })
       .sort((a, b) => {
+        if (sortBy === 'title') return a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' });
         if (sortBy === 'rating') return b.rating - a.rating;
-        if (sortBy === 'title') return a.title.localeCompare(b.title);
         if (sortBy === 'year') return b.year - a.year;
         return 0;
       });
@@ -199,8 +199,8 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
               </label>
               <div className="flex flex-wrap gap-2">
                 {[
+                  { id: 'title', label: 'Ordem Alfabética (A-Z)' },
                   { id: 'rating', label: 'Melhor Avaliados' },
-                  { id: 'title', label: 'Título (A-Z)' },
                   { id: 'year', label: 'Ano de Publicação' },
                 ].map((o) => (
                   <button
@@ -224,7 +224,7 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
               <button
                 onClick={() => {
                   setSelectedStatus('todos');
-                  setSortBy('rating');
+                  setSortBy('title');
                   setSelectedCategory('Todos');
                   setSearchQuery('');
                 }}

@@ -19,10 +19,13 @@ import {
   FileText,
   Shield,
   History,
+  Cat,
+  RotateCcw,
 } from 'lucide-react';
 import { Book, Loan, Student, Suggestion, AdminUser, AuditLog } from '../types';
 import { parseBackupJson, ParseResult } from '../utils/dataParser';
 import { useTheme } from '../context/ThemeContext';
+import { resetMissaoQuiterioDatabase } from '../utils/quiterioScores';
 
 interface BackupRestoreViewProps {
   books: Book[];
@@ -55,6 +58,7 @@ export const BackupRestoreView: React.FC<BackupRestoreViewProps> = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isRestoreConfirmOpen, setIsRestoreConfirmOpen] = useState(false);
+  const [isResetQuiterioConfirmOpen, setIsResetQuiterioConfirmOpen] = useState(false);
   const [parsedRestoreData, setParsedRestoreData] = useState<{
     books?: Book[];
     loans?: Loan[];
@@ -70,6 +74,13 @@ export const BackupRestoreView: React.FC<BackupRestoreViewProps> = ({
   const [activeRestoreMethod, setActiveRestoreMethod] = useState<'upload' | 'paste'>('upload');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleResetQuiterio = () => {
+    resetMissaoQuiterioDatabase();
+    setIsResetQuiterioConfirmOpen(false);
+    setSuccessMessage('Banco de dados do Missão Quitério zerado com sucesso! Todos os pontos e desafios foram reiniciados.');
+    setTimeout(() => setSuccessMessage(null), 6000);
+  };
 
   // Generate backup payload object matching the authentic Maria Quitéria project schema
   const createBackupPayload = () => {
@@ -580,6 +591,79 @@ export const BackupRestoreView: React.FC<BackupRestoreViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* CARD 3: MANUTENÇÃO E GAMIFICAÇÃO (MISSÃO QUITÉRIO) */}
+      <div className={`border rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 ${isDark ? 'bg-[#092032] border-[#163650]' : 'bg-white border-slate-200 shadow-sm'}`}>
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 shrink-0">
+            <Cat className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className={`text-lg font-bold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              Banco de Dados do Missão Quitério
+            </h3>
+            <p className={`text-xs sm:text-sm leading-relaxed max-w-xl ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+              Zere todos os pontos, histórico de perguntas respondidas, sequências e pontuações por livro do jogo Missão Quitério para reiniciar uma nova temporada ou competição escolar.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsResetQuiterioConfirmOpen(true)}
+          className="px-5 py-3 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-600 dark:text-amber-400 font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-all shrink-0"
+        >
+          <RotateCcw className="w-4 h-4" />
+          <span>Zerar Missão Quitério</span>
+        </button>
+      </div>
+
+      {/* RESET MISSAO QUITERIO CONFIRMATION MODAL */}
+      {isResetQuiterioConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className={`border rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 animate-in zoom-in-95 ${
+            isDark ? 'bg-[#092032] border-[#163650]' : 'bg-white border-slate-200'
+          }`}>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-500 shrink-0">
+                <Cat className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Zerar Missão Quitério?
+                </h3>
+                <p className={`text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                  Esta ação reinicia todas as pontuações do jogo.
+                </p>
+              </div>
+            </div>
+
+            <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+              Tem certeza que deseja <strong>zerar todo o banco de dados do Missão Quitério</strong>? Todas as respostas, acertos e medalhas dos alunos voltarão para o início (0 pontos). O catálogo de livros e os cadastros dos estudantes permanecerão intactos.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsResetQuiterioConfirmOpen(false)}
+                className={`px-4 py-2.5 rounded-xl border text-xs font-semibold cursor-pointer ${
+                  isDark ? 'border-[#163650] text-slate-300 hover:bg-[#0d283d]' : 'border-slate-300 text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleResetQuiterio}
+                className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-colors cursor-pointer shadow-md flex items-center gap-1.5"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Sim, Zerar Missão Quitério</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* JSON Preview Modal / Collapsible */}
       {showJsonPreview && (

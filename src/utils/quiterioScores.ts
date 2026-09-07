@@ -27,60 +27,43 @@ export interface StudentScoreData {
   bookScores?: Record<string, BookScoreDetail>;
 }
 
-const STORAGE_KEY = 'bmq_quiterio_game_scores';
+const STORAGE_KEY = 'bmq_quiterio_game_scores_v3';
 
-// Initial baseline mock leaderboard to match the reference image & lively school gamification
-const BASE_LEADERBOARD: { name: string; score: number; code?: string }[] = [
-  { name: 'Ana Souza', score: 3200, code: 'ANA-0005' },
-  { name: 'Pedro Henrique', score: 2980, code: 'PED-0006' },
-  { name: 'Lucas Alencar', score: 2760, code: 'LUC-0007' },
-  { name: 'Ruan Santos da Silva', score: 2450, code: 'RUA-0004' },
-  { name: 'Gustavo Oliveira', score: 2100, code: 'GUS-0001' },
-  { name: 'Kalil Lopes', score: 1850, code: 'KAL-0003' },
-  { name: 'Amilton Luan', score: 1600, code: 'AMI-0002' },
-];
-
+// Database initialized completely zeroed - no mock scores
 export const loadScoresMap = (): Record<string, StudentScoreData> => {
   if (typeof window === 'undefined') return {};
   try {
+    // Purge legacy mock scores if they exist
+    if (localStorage.getItem('bmq_quiterio_game_scores')) {
+      localStorage.removeItem('bmq_quiterio_game_scores');
+    }
+    if (localStorage.getItem('bmq_quiterio_game_scores_v2')) {
+      localStorage.removeItem('bmq_quiterio_game_scores_v2');
+    }
+
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      // Seed default baseline
+      // Empty database - completely zeroed
       const initialMap: Record<string, StudentScoreData> = {};
-      BASE_LEADERBOARD.forEach((item) => {
-        const key = (item.code || item.name).toLowerCase();
-        initialMap[key] = {
-          studentId: key,
-          studentCode: item.code,
-          studentName: item.name,
-          score: item.score,
-          correctAnswers: Math.floor(item.score / 100),
-          totalAnswered: Math.floor(item.score / 100) + 2,
-          currentStreak: 2,
-          bestStreak: 4,
-          completedBooks: ['O Pequeno Príncipe'],
-          attemptsCount: 3,
-          bookScores: {
-            'O Pequeno Príncipe': {
-              bookTitle: 'O Pequeno Príncipe',
-              bookAuthor: 'Antoine de Saint-Exupéry',
-              bookCover:
-                'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&auto=format&fit=crop&q=80',
-              points: item.score,
-              correctAnswers: Math.floor(item.score / 100),
-              totalQuestions: Math.floor(item.score / 100) + 2,
-              attemptsCount: 3,
-              lastPlayedAt: new Date().toISOString(),
-            },
-          },
-        };
-      });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initialMap));
       return initialMap;
     }
     return JSON.parse(raw);
   } catch {
     return {};
+  }
+};
+
+export const resetMissaoQuiterioDatabase = (): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem('bmq_quiterio_game_scores');
+    localStorage.removeItem('bmq_quiterio_game_scores_v2');
+    localStorage.removeItem('bmq_quiterio_game_scores_v3');
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({}));
+    window.dispatchEvent(new CustomEvent('bmq_quiterio_scores_updated'));
+  } catch (err) {
+    console.error('Failed to reset Missao Quiterio database:', err);
   }
 };
 
@@ -280,7 +263,14 @@ export const resetStudentAttempts = (
 
 export const getTopSchoolRanking = (currentStudentCode?: string) => {
   const map = loadScoresMap();
-  const all = Object.values(map).sort((a, b) => b.score - a.score);
+  const all = Object.values(map)
+    .filter(
+      (item) =>
+        (item.score && item.score > 0) ||
+        (item.correctAnswers && item.correctAnswers > 0) ||
+        (item.totalAnswered && item.totalAnswered > 0)
+    )
+    .sort((a, b) => b.score - a.score);
 
   const cleanCurrent = currentStudentCode
     ? currentStudentCode.trim().toLowerCase().replace(/^alu-/, '')
@@ -292,11 +282,11 @@ export const getTopSchoolRanking = (currentStudentCode?: string) => {
           item.studentId === cleanCurrent ||
           (item.studentCode && item.studentCode.toLowerCase().replace(/^alu-/, '') === cleanCurrent)
       ) + 1
-    : 4;
+    : 1;
 
   return {
     topThree: all.slice(0, 3),
-    currentRank: currentRank > 0 ? currentRank : 4,
+    currentRank: currentRank > 0 ? currentRank : 1,
     allLeaderboard: all,
   };
 };

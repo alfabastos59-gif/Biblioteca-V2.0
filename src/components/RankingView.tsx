@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Trophy,
   TrendingUp,
@@ -51,8 +51,18 @@ export const RankingView: React.FC<RankingViewProps> = ({
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [searchStudent, setSearchStudent] = useState<string>('');
   const [searchBook, setSearchBook] = useState<string>('');
+  const [studentSortOrder, setStudentSortOrder] = useState<'ranking' | 'alfabetica'>('ranking');
+  const [bookSortOrder, setBookSortOrder] = useState<'ranking' | 'alfabetica'>('ranking');
   const [activeTab, setActiveTab] = useState<'geral' | 'alunos' | 'livros'>('geral');
   const [showAllQuiterio, setShowAllQuiterio] = useState<boolean>(false);
+  const [scoresRevision, setScoresRevision] = useState<number>(0);
+
+  // Re-render when Missão Quitério scores are updated or reset
+  useEffect(() => {
+    const handleUpdate = () => setScoresRevision((prev) => prev + 1);
+    window.addEventListener('bmq_quiterio_scores_updated', handleUpdate);
+    return () => window.removeEventListener('bmq_quiterio_scores_updated', handleUpdate);
+  }, []);
 
   // Dynamic calculation of students who answered Missão Quitério challenges
   const quiterioAchievers = useMemo(() => {
@@ -96,14 +106,14 @@ export const RankingView: React.FC<RankingViewProps> = ({
       .sort((a, b) => b.score - a.score);
 
     return list;
-  }, [students]);
+  }, [students, scoresRevision]);
 
   const totalUniqueBooksAnswered = useMemo(() => {
     const booksSet = new Set<string>();
     quiterioAchievers.forEach((achiever) => {
       achiever.booksAnswered.forEach((bk) => booksSet.add(bk));
     });
-    return booksSet.size > 0 ? booksSet.size : 1;
+    return booksSet.size;
   }, [quiterioAchievers]);
 
   // Available classes
@@ -153,11 +163,11 @@ export const RankingView: React.FC<RankingViewProps> = ({
         if (b.totalCount !== a.totalCount) return b.totalCount - a.totalCount;
         return a.name.localeCompare(b.name);
       });
-  }, [students, loans]);
+  }, [students, loans, scoresRevision]);
 
   // Filtered Student Ranking
   const filteredStudents = useMemo(() => {
-    return fullStudentRanking.filter((st) => {
+    const list = fullStudentRanking.filter((st) => {
       const matchClass = selectedClass === 'all' || st.class.toLowerCase() === selectedClass.toLowerCase();
       const matchSearch =
         searchStudent === '' ||
@@ -166,7 +176,12 @@ export const RankingView: React.FC<RankingViewProps> = ({
         st.class.toLowerCase().includes(searchStudent.toLowerCase());
       return matchClass && matchSearch;
     });
-  }, [fullStudentRanking, selectedClass, searchStudent]);
+
+    if (studentSortOrder === 'alfabetica') {
+      return [...list].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
+    }
+    return list;
+  }, [fullStudentRanking, selectedClass, searchStudent, studentSortOrder]);
 
   // Dynamic Book Ranking Calculation
   const fullBookRanking = useMemo(() => {
@@ -187,13 +202,13 @@ export const RankingView: React.FC<RankingViewProps> = ({
       .sort((a, b) => {
         if (b.totalLoans !== a.totalLoans) return b.totalLoans - a.totalLoans;
         if (b.rating !== a.rating) return b.rating - a.rating;
-        return a.title.localeCompare(b.title);
+        return a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' });
       });
   }, [books, loans]);
 
   // Filtered Book Ranking
   const filteredBooks = useMemo(() => {
-    return fullBookRanking.filter((bk) => {
+    const list = fullBookRanking.filter((bk) => {
       if (!searchBook) return true;
       const q = searchBook.toLowerCase();
       return (
@@ -202,7 +217,12 @@ export const RankingView: React.FC<RankingViewProps> = ({
         bk.category.toLowerCase().includes(q)
       );
     });
-  }, [fullBookRanking, searchBook]);
+
+    if (bookSortOrder === 'alfabetica') {
+      return [...list].sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
+    }
+    return list;
+  }, [fullBookRanking, searchBook, bookSortOrder]);
 
   // Top 3 Podium for Students
   const top1 = fullStudentRanking[0];
@@ -912,6 +932,38 @@ export const RankingView: React.FC<RankingViewProps> = ({
                 </select>
               </div>
 
+              {/* Order Selector (Ranking vs Alfabetica) */}
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setStudentSortOrder('ranking')}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer border ${
+                    studentSortOrder === 'ranking'
+                      ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-500 shadow-xs'
+                      : isDark
+                      ? 'bg-[#092032] text-slate-400 border-[#163650] hover:text-white'
+                      : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900'
+                  }`}
+                  title="Ordenar por Pontuação / Posição no Ranking"
+                >
+                  🏆 Ranking
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStudentSortOrder('alfabetica')}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer border ${
+                    studentSortOrder === 'alfabetica'
+                      ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-500 shadow-xs'
+                      : isDark
+                      ? 'bg-[#092032] text-slate-400 border-[#163650] hover:text-white'
+                      : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900'
+                  }`}
+                  title="Ordenar Alunos em Ordem Alfabética (A-Z)"
+                >
+                  🔤 A-Z
+                </button>
+              </div>
+
               {/* Counter tag */}
               <div className="flex items-center justify-end">
                 <span className={`text-xs font-semibold px-3 py-2 rounded-xl border ${isDark ? 'bg-[#092032] border-[#163650] text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-800'}`}>
@@ -1017,9 +1069,43 @@ export const RankingView: React.FC<RankingViewProps> = ({
                 />
               </div>
 
-              <span className={`text-xs font-semibold px-3 py-2 rounded-xl border ${isDark ? 'bg-[#092032] border-[#163650] text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-800'}`}>
-                {filteredBooks.length} obras cadastradas
-              </span>
+              <div className="flex items-center gap-3">
+                {/* Order Selector (Ranking vs Alfabetica) */}
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setBookSortOrder('ranking')}
+                    className={`px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer border ${
+                      bookSortOrder === 'ranking'
+                        ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-500 shadow-xs'
+                        : isDark
+                        ? 'bg-[#092032] text-slate-400 border-[#163650] hover:text-white'
+                        : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900'
+                    }`}
+                    title="Ordenar por Mais Lidos / Empréstimos"
+                  >
+                    🏆 Mais Lidos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBookSortOrder('alfabetica')}
+                    className={`px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer border ${
+                      bookSortOrder === 'alfabetica'
+                        ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-500 shadow-xs'
+                        : isDark
+                        ? 'bg-[#092032] text-slate-400 border-[#163650] hover:text-white'
+                        : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900'
+                    }`}
+                    title="Ordenar Livros em Ordem Alfabética (A-Z)"
+                  >
+                    🔤 A-Z
+                  </button>
+                </div>
+
+                <span className={`text-xs font-semibold px-3 py-2 rounded-xl border ${isDark ? 'bg-[#092032] border-[#163650] text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-800'}`}>
+                  {filteredBooks.length} obras cadastradas
+                </span>
+              </div>
             </div>
 
             {/* Grid of Books */}

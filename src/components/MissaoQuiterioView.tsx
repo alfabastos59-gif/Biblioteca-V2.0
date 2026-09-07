@@ -694,22 +694,28 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
           >
             {/* Top 3 List */}
             <div className="grid grid-cols-3 gap-2">
-              {leaderboard.topThree.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="p-1.5 rounded-xl bg-slate-900/70 border border-purple-400/30 border-b-2 border-purple-900 flex flex-col items-center text-center shadow-sm"
-                >
-                  <span className="text-[11px] font-black text-amber-400 leading-tight">
-                    {idx === 0 ? '🥇 1º' : idx === 1 ? '🥈 2º' : '🥉 3º'}
-                  </span>
-                  <span className="text-xs font-bold text-white truncate max-w-[75px]">
-                    {item.studentName.split(' ')[0]}
-                  </span>
-                  <span className="text-[10px] font-mono text-amber-300 font-extrabold">
-                    {item.score}
-                  </span>
+              {leaderboard.topThree && leaderboard.topThree.length > 0 ? (
+                leaderboard.topThree.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="p-1.5 rounded-xl bg-slate-900/70 border border-purple-400/30 border-b-2 border-purple-900 flex flex-col items-center text-center shadow-sm"
+                  >
+                    <span className="text-[11px] font-black text-amber-400 leading-tight">
+                      {idx === 0 ? '🥇 1º' : idx === 1 ? '🥈 2º' : '🥉 3º'}
+                    </span>
+                    <span className="text-xs font-bold text-white truncate max-w-[75px]">
+                      {item.studentName.split(' ')[0]}
+                    </span>
+                    <span className="text-[10px] font-mono text-amber-300 font-extrabold">
+                      {item.score}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-3 py-2.5 px-3 text-center rounded-xl bg-slate-900/70 border border-purple-400/30 text-[11px] text-amber-200/90 font-semibold">
+                  🐾 Nenhum ponto registrado ainda!
                 </div>
-              ))}
+              )}
             </div>
 
             {/* Current Student Rank Pill (3D Amber Yellow Pill) */}
@@ -717,7 +723,11 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
               <span className="flex items-center gap-1.5">
                 <span>🐾</span>
                 <span>
-                  Você está em <strong>{leaderboard.currentRank}º lugar</strong>!
+                  {gameData.score > 0 ? (
+                    <>Você está em <strong>{leaderboard.currentRank}º lugar</strong>!</>
+                  ) : (
+                    <>Responda para entrar no <strong>Ranking</strong>!</>
+                  )}
                 </span>
               </span>
               <span className="text-[10px] font-mono text-amber-950 font-extrabold bg-amber-300/60 px-1.5 py-0.5 rounded-md">
@@ -1011,7 +1021,7 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
                       </span>
                       <span>•</span>
                       <span>
-                        Ranking: <strong>{leaderboard.currentRank}º lugar</strong>
+                        Ranking: <strong>{gameData.score > 0 ? `${leaderboard.currentRank}º lugar` : 'A definir'}</strong>
                       </span>
                     </div>
 
@@ -1620,7 +1630,9 @@ export const MissaoQuiterioView: React.FC<MissaoQuiterioViewProps> = ({
 
               {/* Book List Grid */}
               <div className="flex-1 overflow-y-auto space-y-2 pr-1 my-1">
-                {books.map((b) => {
+                {[...books]
+                  .sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }))
+                  .map((b) => {
                   const isCurrent = selectedBookForQuiz.id === b.id;
                   const bookScore = (gameData.bookScores || {})[b.title];
 

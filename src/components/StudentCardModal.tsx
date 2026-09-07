@@ -83,16 +83,18 @@ export const StudentCardModal: React.FC<StudentCardModalProps> = ({
 
   // Filter students based on search query, class, and showOnlySelected toggle
   const filteredStudents = useMemo(() => {
-    return students.filter((s) => {
-      const matchClass = selectedClass === 'all' || s.class === selectedClass;
-      const matchQuery =
-        !searchQuery.trim() ||
-        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (s.studentCode && s.studentCode.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (s.registration && s.registration.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchOnlySelected = !showOnlySelected || selectedStudentIds.includes(s.id);
-      return matchClass && matchQuery && matchOnlySelected;
-    });
+    return students
+      .filter((s) => {
+        const matchClass = selectedClass === 'all' || s.class === selectedClass;
+        const matchQuery =
+          !searchQuery.trim() ||
+          s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (s.studentCode && s.studentCode.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          (s.registration && s.registration.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchOnlySelected = !showOnlySelected || selectedStudentIds.includes(s.id);
+        return matchClass && matchQuery && matchOnlySelected;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
   }, [students, selectedClass, searchQuery, showOnlySelected, selectedStudentIds]);
 
   // Student currently displayed in the live preview panel
@@ -102,7 +104,9 @@ export const StudentCardModal: React.FC<StudentCardModalProps> = ({
 
   // Students that will actually be printed
   const studentsToPrint = useMemo(() => {
-    return students.filter((s) => selectedStudentIds.includes(s.id));
+    return students
+      .filter((s) => selectedStudentIds.includes(s.id))
+      .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
   }, [students, selectedStudentIds]);
 
   if (!isOpen) return null;

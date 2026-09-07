@@ -989,7 +989,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         b.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         b.category.toLowerCase().includes(searchTerm.toLowerCase())
                       )
-                      .slice(0, 15)
+                      .sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }))
                       .map((book) => (
                         <tr key={book.id} className={`transition-colors ${
                           isDark ? 'hover:bg-[#0d2a40]/50' : 'hover:bg-slate-50'
@@ -1054,17 +1054,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {/* SECTION: ALUNOS */}
         {adminSection === 'alunos' && (() => {
-          const filteredStudents = students.filter((student) => {
-            const query = studentSearchQuery.toLowerCase().trim();
-            if (!query) return true;
-            return (
-              student.name.toLowerCase().includes(query) ||
-              (student.studentCode && student.studentCode.toLowerCase().includes(query)) ||
-              (student.class && student.class.toLowerCase().includes(query)) ||
-              (student.registration && student.registration.toLowerCase().includes(query)) ||
-              (student.phone && student.phone.includes(query))
-            );
-          });
+          const filteredStudents = students
+            .filter((student) => {
+              const query = studentSearchQuery.toLowerCase().trim();
+              if (!query) return true;
+              return (
+                student.name.toLowerCase().includes(query) ||
+                (student.studentCode && student.studentCode.toLowerCase().includes(query)) ||
+                (student.class && student.class.toLowerCase().includes(query)) ||
+                (student.registration && student.registration.toLowerCase().includes(query)) ||
+                (student.phone && student.phone.includes(query))
+              );
+            })
+            .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
 
           return (
             <div className="space-y-4 animate-in fade-in duration-150">

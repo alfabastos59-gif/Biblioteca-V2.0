@@ -168,14 +168,16 @@ export const LoanModal: React.FC<LoanModalProps> = ({
                     isDark ? 'bg-[#031320] text-white border-[#163650]' : 'bg-slate-50 text-slate-900 border-slate-300'
                   }`}
                 >
-                  {students.map((s) => {
-                    const code = (s.studentCode || '').replace(/^ALU-/, '');
-                    return (
-                      <option key={s.id} value={s.id} className={isDark ? 'bg-[#092032] text-white' : 'bg-white text-slate-900'}>
-                        {code ? `[${code}] ` : ''}{s.name} ({s.class})
-                      </option>
-                    );
-                  })}
+                  {[...students]
+                    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }))
+                    .map((s) => {
+                      const code = (s.studentCode || '').replace(/^ALU-/, '');
+                      return (
+                        <option key={s.id} value={s.id} className={isDark ? 'bg-[#092032] text-white' : 'bg-white text-slate-900'}>
+                          {code ? `[${code}] ` : ''}{s.name} ({s.class})
+                        </option>
+                      );
+                    })}
                 </select>
               </div>
             )}
