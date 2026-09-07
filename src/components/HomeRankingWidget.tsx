@@ -31,7 +31,7 @@ export const HomeRankingWidget: React.FC<HomeRankingWidgetProps> = ({
   onSelectBook,
   onViewFullRanking,
 }) => {
-  const { isDark } = useTheme();
+  const { isDark, isPurple, isEmerald } = useTheme();
 
   // 1. Calculate dynamic student ranking based on real loans
   const studentRanking = React.useMemo(() => {
@@ -122,7 +122,9 @@ export const HomeRankingWidget: React.FC<HomeRankingWidgetProps> = ({
           id="btn-ver-ranking-completo"
           onClick={onViewFullRanking}
           className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer shadow-sm shrink-0 border ${
-            isDark
+            isPurple
+              ? 'bg-[#240f47] hover:bg-[#32145e] text-[#c084fc] border-[#3e196e] hover:border-[#a855f7]'
+              : isDark
               ? 'bg-[#092032] hover:bg-[#0f2e46] text-emerald-400 border-[#163650] hover:border-emerald-500/50'
               : 'bg-white hover:bg-slate-50 text-emerald-700 border-slate-200 hover:border-emerald-300'
           }`}
@@ -142,7 +144,11 @@ export const HomeRankingWidget: React.FC<HomeRankingWidgetProps> = ({
           <div
             id="card-top-aluno-destaque"
             className={`relative rounded-2xl p-6 border transition-all duration-300 overflow-hidden shadow-lg ${
-              isDark
+              isEmerald
+                ? 'bg-gradient-to-br from-[#062438] via-[#083049] to-[#041c2c] border-amber-500/40 shadow-amber-500/5'
+                : isPurple
+                ? 'bg-gradient-to-br from-[#240f47] via-[#2f135b] to-[#1e0a3c] border-amber-500/40 shadow-amber-500/5'
+                : isDark
                 ? 'bg-gradient-to-br from-[#061b2b] via-[#092237] to-[#041320] border-amber-500/40 shadow-amber-500/5'
                 : 'bg-gradient-to-br from-amber-50/70 via-white to-amber-50/40 border-amber-300 shadow-sm'
             }`}
@@ -181,7 +187,7 @@ export const HomeRankingWidget: React.FC<HomeRankingWidgetProps> = ({
                           topStudent.name
                         )}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
                       }}
-                      className="w-full h-full object-cover rounded-xl bg-slate-800 transition-transform duration-300 ease-out hover:scale-115 hover:rotate-2 cursor-pointer shadow-md"
+                      className="w-full h-full object-cover rounded-xl bg-slate-800 student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 cursor-pointer shadow-md hover:shadow-2xl hover:z-40 relative"
                     />
                   </div>
                   <div className="absolute -bottom-2 -right-1 bg-amber-400 text-slate-950 text-xs font-extrabold w-7 h-7 rounded-full flex items-center justify-center border-2 border-white shadow-md">
@@ -244,7 +250,11 @@ export const HomeRankingWidget: React.FC<HomeRankingWidgetProps> = ({
           <div
             id="card-top-livro-destaque"
             className={`relative rounded-2xl p-6 border transition-all duration-300 overflow-hidden shadow-lg ${
-              isDark
+              isEmerald
+                ? 'bg-gradient-to-br from-[#052924] via-[#083832] to-[#031d1a] border-[#00e676]/40 shadow-[0_10px_30px_rgba(0,230,118,0.1)]'
+                : isPurple
+                ? 'bg-gradient-to-br from-[#240c49] via-[#320f5c] to-[#1a0733] border-purple-500/40 shadow-purple-500/5'
+                : isDark
                 ? 'bg-gradient-to-br from-[#061e27] via-[#082a35] to-[#04151b] border-emerald-500/40 shadow-emerald-500/5'
                 : 'bg-gradient-to-br from-emerald-50/70 via-white to-emerald-50/40 border-emerald-300 shadow-sm'
             }`}
@@ -371,7 +381,11 @@ export const HomeRankingWidget: React.FC<HomeRankingWidgetProps> = ({
         <div
           id="ranking-de-leitores-card"
           className={`rounded-2xl p-4 sm:p-6 border transition-all shadow-md ${
-            isDark
+            isEmerald
+              ? 'bg-[#062438] border-[#0c4061]'
+              : isPurple
+              ? 'bg-[#1c0b3d] border-[#3e196e]'
+              : isDark
               ? 'bg-[#001424] border-[#163650]'
               : 'bg-white border-slate-200'
           }`}
@@ -388,7 +402,13 @@ export const HomeRankingWidget: React.FC<HomeRankingWidgetProps> = ({
             </h3>
             <span
               className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                isDark ? 'bg-[#092032] text-slate-400 border border-[#163650]' : 'bg-slate-100 text-slate-600'
+                isEmerald
+                  ? 'bg-[#0c4061] text-[#00e676] border border-[#00e676]/30'
+                  : isPurple
+                  ? 'bg-[#2e105e] text-purple-300 border border-[#a855f7]/40'
+                  : isDark
+                  ? 'bg-[#092032] text-slate-400 border border-[#163650]'
+                  : 'bg-slate-100 text-slate-600'
               }`}
             >
               Top Leitores
@@ -408,7 +428,15 @@ export const HomeRankingWidget: React.FC<HomeRankingWidgetProps> = ({
                   key={st.id}
                   id={`ranking-reader-row-${st.id}`}
                   className={`flex items-center justify-between p-3 rounded-2xl transition-all duration-200 border ${
-                    isDark
+                    isEmerald
+                      ? isFirst
+                        ? 'bg-[#0a3550] border-amber-500/40 shadow-sm shadow-amber-500/5'
+                        : 'bg-[#041a29]/80 border-[#0a2e46] hover:bg-[#08283f] hover:border-[#0c4061]'
+                      : isPurple
+                      ? isFirst
+                        ? 'bg-[#291054] border-amber-500/40 shadow-sm shadow-amber-500/10'
+                        : 'bg-[#210c44]/80 border-[#381665] hover:bg-[#2b1057] hover:border-[#a855f7]/50'
+                      : isDark
                       ? isFirst
                         ? 'bg-[#09263a]/90 border-amber-500/40 shadow-sm shadow-amber-500/5'
                         : 'bg-[#051a2a]/80 border-[#122e44] hover:bg-[#092237] hover:border-[#1a4464]'
@@ -453,7 +481,7 @@ export const HomeRankingWidget: React.FC<HomeRankingWidgetProps> = ({
                             st.name
                           )}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
                         }}
-                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border transition-transform duration-300 ease-out hover:scale-125 hover:shadow-lg hover:z-20 cursor-pointer ${
+                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 hover:shadow-2xl hover:z-40 cursor-pointer relative ${
                           isFirst
                             ? 'border-amber-400 ring-2 ring-amber-400/30'
                             : isDark
@@ -504,7 +532,11 @@ export const HomeRankingWidget: React.FC<HomeRankingWidgetProps> = ({
         <div
           id="mais-lidos-card"
           className={`rounded-2xl p-4 sm:p-6 border transition-all shadow-md ${
-            isDark
+            isEmerald
+              ? 'bg-[#062438] border-[#0c4061]'
+              : isPurple
+              ? 'bg-[#1c0b3d] border-[#3e196e]'
+              : isDark
               ? 'bg-[#001424] border-[#163650]'
               : 'bg-white border-slate-200'
           }`}
@@ -516,12 +548,18 @@ export const HomeRankingWidget: React.FC<HomeRankingWidgetProps> = ({
                 isDark ? 'text-white' : 'text-slate-900'
               }`}
             >
-              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
+              <TrendingUp className={`w-5 h-5 sm:w-6 sm:h-6 ${isEmerald ? 'text-[#00e676]' : isPurple ? 'text-[#c084fc]' : 'text-emerald-400'}`} />
               <span>Mais lidos</span>
             </h3>
             <span
               className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                isDark ? 'bg-[#092032] text-slate-400 border border-[#163650]' : 'bg-slate-100 text-slate-600'
+                isEmerald
+                  ? 'bg-[#0c4061] text-[#00e676] border border-[#00e676]/30'
+                  : isPurple
+                  ? 'bg-[#2e105e] text-purple-300 border border-[#a855f7]/40'
+                  : isDark
+                  ? 'bg-[#092032] text-slate-400 border border-[#163650]'
+                  : 'bg-slate-100 text-slate-600'
               }`}
             >
               Top Livros
@@ -540,7 +578,15 @@ export const HomeRankingWidget: React.FC<HomeRankingWidgetProps> = ({
                   id={`ranking-book-row-${bk.id}`}
                   onClick={() => onSelectBook(bk)}
                   className={`flex items-center justify-between p-3 rounded-2xl transition-all duration-200 border cursor-pointer group ${
-                    isDark
+                    isEmerald
+                      ? isFirst
+                        ? 'bg-[#052924] border-[#00e676]/40 shadow-sm shadow-[#00e676]/10 hover:border-[#00e676]'
+                        : 'bg-[#041a29]/80 border-[#0a2e46] hover:bg-[#08283f] hover:border-[#0c4061]'
+                      : isPurple
+                      ? isFirst
+                        ? 'bg-[#2d0f52] border-purple-500/40 shadow-sm shadow-purple-500/10 hover:border-[#a855f7]'
+                        : 'bg-[#210c44]/80 border-[#381665] hover:bg-[#2b1057] hover:border-[#a855f7]/50'
+                      : isDark
                       ? isFirst
                         ? 'bg-[#06242a]/90 border-emerald-500/40 shadow-sm shadow-emerald-500/5 hover:border-emerald-400'
                         : 'bg-[#051a2a]/80 border-[#122e44] hover:bg-[#092237] hover:border-[#1a4464]'

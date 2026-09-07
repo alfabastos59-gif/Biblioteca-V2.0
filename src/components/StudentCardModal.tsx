@@ -484,7 +484,7 @@ export const StudentCardModal: React.FC<StudentCardModalProps> = ({
                             <img
                               src={student.avatar}
                               alt={student.name}
-                              className="w-9 h-9 rounded-full object-cover border border-emerald-500/30 shrink-0 bg-slate-200"
+                              className="w-9 h-9 rounded-full object-cover border border-emerald-500/30 shrink-0 bg-slate-200 student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 cursor-pointer hover:shadow-2xl hover:z-40 relative"
                             />
 
                             <div className="min-w-0 flex-1">

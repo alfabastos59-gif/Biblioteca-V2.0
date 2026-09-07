@@ -496,7 +496,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ loans = [], books = []
                   <img
                     src={st.avatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + st.name}
                     alt={st.name}
-                    className={`w-11 h-11 rounded-full object-cover border ${
+                    className={`w-11 h-11 rounded-full object-cover border student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 cursor-pointer hover:shadow-2xl hover:z-40 relative ${
                       isDark ? 'border-[#163e5e] bg-[#071828]' : 'border-slate-200 bg-white'
                     }`}
                   />
@@ -607,7 +607,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ loans = [], books = []
                         <img
                           src={loan.studentAvatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + loan.studentName}
                           alt={loan.studentName}
-                          className={`w-7 h-7 rounded-full object-cover border ${
+                          className={`w-7 h-7 rounded-full object-cover border student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 cursor-pointer hover:shadow-2xl hover:z-40 relative ${
                             isDark ? 'border-[#163650] bg-[#001424]' : 'border-slate-200 bg-white'
                           }`}
                         />

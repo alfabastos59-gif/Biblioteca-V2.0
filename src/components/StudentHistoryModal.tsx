@@ -49,7 +49,7 @@ export const StudentHistoryModal: React.FC<StudentHistoryModalProps> = ({
             <img
               src={student.avatar}
               alt={student.name}
-              className={`w-11 h-11 rounded-full object-cover border ${
+              className={`w-11 h-11 rounded-full object-cover border student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 cursor-pointer hover:shadow-2xl hover:z-40 relative ${
                 isDark ? 'border-[#163e5e] bg-[#092032]' : 'border-slate-200 bg-slate-100'
               }`}
             />

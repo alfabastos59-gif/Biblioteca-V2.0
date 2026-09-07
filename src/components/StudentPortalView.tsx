@@ -55,7 +55,7 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
               <img
                 src={student.avatar}
                 alt={student.name}
-                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-emerald-400 shadow-lg ${
+                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-emerald-400 shadow-lg student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 cursor-pointer hover:shadow-2xl hover:z-40 relative ${
                   isDark ? 'bg-[#001424]' : 'bg-slate-100'
                 }`}
               />

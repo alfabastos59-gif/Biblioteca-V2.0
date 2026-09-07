@@ -1,16 +1,20 @@
 import { OFFICIAL_STUDENT_AVATARS } from './studentAvatars';
+import { ADMIN_AVATAR_OPTIONS } from './adminAvatars';
+import { MEMOJI_AVATAR_OPTIONS } from './memojiAvatars';
 
 export interface AvatarOption {
   id: string;
   name: string;
-  category: 'oficiais' | 'estudantes' | 'fantasia' | 'robos' | 'expressoes' | 'mascotes' | 'monstros' | 'vetores' | 'pixel' | '3d';
+  category: 'memoji_3d' | 'ilustrados_25' | 'oficiais' | 'estudantes' | 'fantasia' | 'robos' | 'expressoes' | 'mascotes' | 'monstros' | 'vetores' | 'pixel' | '3d';
   url: string;
   bgColor?: string;
 }
 
 export const AVATAR_CATEGORIES = [
   { id: 'todos', label: 'Todos os Avatares' },
-  { id: 'oficiais', label: '⭐ Avatares Escolares Oficiais' },
+  { id: 'memoji_3d', label: '✨ 12 Memojis 3D' },
+  { id: 'ilustrados_25', label: '🎨 25 Ilustrações Exclusivas' },
+  { id: 'oficiais', label: '⭐ Avatares Escolares (16)' },
   { id: 'estudantes', label: 'Estudantes & Jovens' },
   { id: 'fantasia', label: 'Fantasia & Épico' },
   { id: 'robos', label: 'Robôs & Cyber' },
@@ -24,7 +28,29 @@ export const AVATAR_CATEGORIES = [
 
 export const AVATAR_BANK: AvatarOption[] = [
   // ==========================================
-  // 0. AVATARES ESCOLARES OFICIAIS (16 PERSONAGENS DA ESCOLA)
+  // 0. BANCO DE 12 AVATARES MEMOJI 3D (NOVA COLEÇÃO)
+  // ==========================================
+  ...MEMOJI_AVATAR_OPTIONS.map((av) => ({
+    id: av.id,
+    name: av.name,
+    category: 'memoji_3d' as const,
+    url: av.url,
+    bgColor: av.bgHex,
+  })),
+
+  // ==========================================
+  // 1. BANCO DE 25 AVATARES ILUSTRADOS (GRADE 5x5 EXCLUSIVA)
+  // ==========================================
+  ...ADMIN_AVATAR_OPTIONS.map((av, index) => ({
+    id: `ilustrado-25-${index + 1}`,
+    name: av.name,
+    category: 'ilustrados_25' as const,
+    url: av.url,
+    bgColor: av.bgHex,
+  })),
+
+  // ==========================================
+  // 2. AVATARES ESCOLARES OFICIAIS (16 PERSONAGENS DA ESCOLA)
   // ==========================================
   ...OFFICIAL_STUDENT_AVATARS.map((av) => ({
     id: av.id,

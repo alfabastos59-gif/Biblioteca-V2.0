@@ -1,5 +1,6 @@
 import { Book, Loan, Student, Suggestion, AdminUser, AuditLog } from '../types';
 import { ADMIN_AVATAR_OPTIONS } from './adminAvatars';
+import { MEMOJI_AVATAR_OPTIONS } from './memojiAvatars';
 
 export const INITIAL_BOOKS: Book[] = [
   {
@@ -1189,7 +1190,7 @@ export const INITIAL_STUDENTS: Student[] = [
     "class": "1º B",
     "email": "adrielly@escola.com",
     "studentCode": "ADR-0007",
-    "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&auto=format&fit=crop&q=80",
+    "avatar": MEMOJI_AVATAR_OPTIONS[0].url,
     "activeLoansCount": 0,
     "totalLoansCount": 1,
     "joinedDate": "17 de Julho de 2026"
@@ -1201,7 +1202,7 @@ export const INITIAL_STUDENTS: Student[] = [
     "email": "amilton.luan@escola.com",
     "phone": "75976022102",
     "studentCode": "AMI-0002",
-    "avatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80",
+    "avatar": MEMOJI_AVATAR_OPTIONS[6].url,
     "activeLoansCount": 0,
     "totalLoansCount": 0,
     "joinedDate": "11 de Junho de 2026"
@@ -1212,7 +1213,7 @@ export const INITIAL_STUDENTS: Student[] = [
     "class": "3º A",
     "email": "eliel.bastos@escola.com",
     "studentCode": "ELI-0010",
-    "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80",
+    "avatar": MEMOJI_AVATAR_OPTIONS[8].url,
     "activeLoansCount": 0,
     "totalLoansCount": 1,
     "joinedDate": "30 de Julho de 2026"
@@ -1223,7 +1224,7 @@ export const INITIAL_STUDENTS: Student[] = [
     "class": "1º Ano A",
     "email": "geisiane.alves@escola.com",
     "studentCode": "GEI-0002",
-    "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&auto=format&fit=crop&q=80",
+    "avatar": MEMOJI_AVATAR_OPTIONS[2].url,
     "activeLoansCount": 0,
     "totalLoansCount": 0,
     "joinedDate": "25 de Agosto de 2026"
@@ -1235,7 +1236,7 @@ export const INITIAL_STUDENTS: Student[] = [
     "email": "gustavo.oliveira@escola.com",
     "phone": "75992024840",
     "studentCode": "GUS-0001",
-    "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+    "avatar": MEMOJI_AVATAR_OPTIONS[3].url,
     "activeLoansCount": 0,
     "totalLoansCount": 1,
     "joinedDate": "28 de Maio de 2026"
@@ -1247,7 +1248,7 @@ export const INITIAL_STUDENTS: Student[] = [
     "email": "jennifer.freitas@escola.com",
     "phone": "75998836064",
     "studentCode": "JEN-0006",
-    "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+    "avatar": MEMOJI_AVATAR_OPTIONS[9].url,
     "activeLoansCount": 0,
     "totalLoansCount": 0,
     "joinedDate": "10 de Julho de 2026"
@@ -1258,7 +1259,7 @@ export const INITIAL_STUDENTS: Student[] = [
     "class": "1º A",
     "email": "kailan@escola.com",
     "studentCode": "KAI-0009",
-    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    "avatar": MEMOJI_AVATAR_OPTIONS[10].url,
     "activeLoansCount": 0,
     "totalLoansCount": 1,
     "joinedDate": "28 de Julho de 2026"

@@ -17,6 +17,7 @@ import { AuthModal } from './components/AuthModal';
 import { StudentPortalView } from './components/StudentPortalView';
 import { RankingView } from './components/RankingView';
 import { MissaoQuiterioView } from './components/MissaoQuiterioView';
+import { LibrasAccessibilityModal } from './components/LibrasAccessibilityModal';
 import { Footer } from './components/Footer';
 
 import {
@@ -31,7 +32,7 @@ import { Book, Loan, Student, Suggestion, ActiveTab, UserSession, AdminUser, Aud
 import { useTheme } from './context/ThemeContext';
 
 export default function App() {
-  const { isDark, isKinetic, isOcean } = useTheme();
+  const { isDark, isKinetic, isOcean, isPurple, isEmerald } = useTheme();
   const DB_VERSION = 'bmq_db_v10_ordem_alfabetica';
 
   const [books, setBooks] = useState<Book[]>(() => {
@@ -139,6 +140,7 @@ export default function App() {
   const [isManageBooksOpen, setIsManageBooksOpen] = useState(false);
   const [isRegisterBookOpen, setIsRegisterBookOpen] = useState(false);
   const [isDesignSystemOpen, setIsDesignSystemOpen] = useState(false);
+  const [isAccessibilityModalOpen, setIsAccessibilityModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Persist state to localStorage
@@ -703,7 +705,11 @@ export default function App() {
   return (
     <div
       className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
-        isKinetic
+        isEmerald
+          ? 'bg-[#021726] text-slate-100 selection:bg-[#00e676] selection:text-slate-950'
+          : isPurple
+          ? 'bg-[#13072b] text-slate-100 selection:bg-purple-500 selection:text-white'
+          : isKinetic
           ? 'bg-[#0c1014] text-slate-100 selection:bg-[#0088cc] selection:text-white'
           : isOcean
           ? 'bg-[#001424] text-slate-100 selection:bg-cyan-500 selection:text-slate-950'
@@ -716,6 +722,7 @@ export default function App() {
         setActiveTab={handleNavigateTab}
         onOpenDesignSystem={() => setIsDesignSystemOpen(true)}
         onOpenRegisterBook={() => setIsRegisterBookOpen(true)}
+        onOpenAccessibility={() => setIsAccessibilityModalOpen(true)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         session={session}
@@ -933,11 +940,19 @@ export default function App() {
         onClose={() => setIsDesignSystemOpen(false)}
       />
 
+      {/* Acessibilidade em Libras & Inclusão (Surdos e Mudos / Deficiência Auditiva e Fala) */}
+      <LibrasAccessibilityModal
+        isOpen={isAccessibilityModalOpen}
+        onClose={() => setIsAccessibilityModalOpen(false)}
+        isDark={isDark}
+      />
+
       {/* Footer */}
       {activeTab !== 'admin' && activeTab !== 'missao-quiterio' && (
         <Footer
           setActiveTab={handleNavigateTab}
           onOpenDesignSystem={() => setIsDesignSystemOpen(true)}
+          onOpenAccessibility={() => setIsAccessibilityModalOpen(true)}
         />
       )}
     </div>

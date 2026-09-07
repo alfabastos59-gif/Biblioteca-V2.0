@@ -896,7 +896,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <img
                           src={loan.studentAvatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80'}
                           alt={loan.studentName}
-                          className={`w-8 h-8 rounded-full object-cover border ${
+                          className={`w-8 h-8 rounded-full object-cover border student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 cursor-pointer hover:shadow-2xl hover:z-40 relative ${
                             isDark ? 'border-[#163650]' : 'border-slate-300'
                           }`}
                         />
@@ -1190,7 +1190,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                 <img
                                   src={student.avatar}
                                   alt={student.name}
-                                  className={`w-9 h-9 rounded-full object-cover border flex-shrink-0 ${
+                                  className={`w-9 h-9 rounded-full object-cover border flex-shrink-0 student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 cursor-pointer hover:shadow-2xl hover:z-40 relative ${
                                     isDark ? 'border-[#163e5e] bg-[#092032]' : 'border-slate-200 bg-white'
                                   }`}
                                 />

@@ -117,7 +117,9 @@ export const LoansView: React.FC<LoansViewProps> = ({
                   <img
                     src={loan.studentAvatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80'}
                     alt={loan.studentName}
-                    className={`w-8 h-8 rounded-full object-cover border ${isDark ? 'border-[#163650]' : 'border-slate-200'}`}
+                    className={`w-8 h-8 rounded-full object-cover border student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 cursor-pointer hover:shadow-2xl hover:z-40 relative ${
+                      isDark ? 'border-[#163650]' : 'border-slate-200'
+                    }`}
                   />
                   <div>
                     <span className={`text-xs font-bold block leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>

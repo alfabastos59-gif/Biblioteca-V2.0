@@ -472,7 +472,7 @@ export const RankingView: React.FC<RankingViewProps> = ({
                             <img
                               src={student.avatar}
                               alt={student.name}
-                              className={`w-12 h-12 rounded-full object-cover border-2 ${
+                              className={`w-12 h-12 rounded-full object-cover border-2 student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 cursor-pointer hover:shadow-2xl hover:z-40 relative ${
                                 isTop1
                                   ? 'border-amber-400 shadow-md ring-2 ring-amber-400/40'
                                   : isTop2
@@ -610,7 +610,7 @@ export const RankingView: React.FC<RankingViewProps> = ({
                   <img
                     src={top2.avatar}
                     alt={top2.name}
-                    className="w-full h-full object-cover rounded-full bg-slate-800 transition-transform duration-300 ease-out hover:scale-125 cursor-pointer shadow-lg hover:shadow-2xl"
+                    className="w-full h-full object-cover rounded-full bg-slate-800 student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 cursor-pointer shadow-lg hover:shadow-2xl hover:z-40 relative"
                   />
                 </div>
                 <h3 className={`font-bold text-base truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -645,7 +645,7 @@ export const RankingView: React.FC<RankingViewProps> = ({
                   <img
                     src={top1.avatar}
                     alt={top1.name}
-                    className="w-full h-full object-cover rounded-full bg-slate-800 transition-transform duration-300 ease-out hover:scale-125 cursor-pointer shadow-xl hover:shadow-2xl hover:rotate-2"
+                    className="w-full h-full object-cover rounded-full bg-slate-800 student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 cursor-pointer shadow-xl hover:shadow-2xl hover:rotate-2 hover:z-40 relative"
                   />
                 </div>
                 <h3 className={`font-extrabold text-lg sm:text-xl truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -679,7 +679,7 @@ export const RankingView: React.FC<RankingViewProps> = ({
                   <img
                     src={top3.avatar}
                     alt={top3.name}
-                    className="w-full h-full object-cover rounded-full bg-slate-800 transition-transform duration-300 ease-out hover:scale-125 cursor-pointer shadow-lg hover:shadow-2xl"
+                    className="w-full h-full object-cover rounded-full bg-slate-800 student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 cursor-pointer shadow-lg hover:shadow-2xl hover:z-40 relative"
                   />
                 </div>
                 <h3 className={`font-bold text-base truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -796,7 +796,7 @@ export const RankingView: React.FC<RankingViewProps> = ({
                         <img
                           src={st.avatar}
                           alt={st.name}
-                          className="w-10 h-10 rounded-full object-cover shrink-0 border border-slate-700 bg-slate-800 transition-transform duration-300 ease-out hover:scale-125 hover:shadow-lg cursor-pointer z-10"
+                          className="w-10 h-10 rounded-full object-cover shrink-0 border border-slate-700 bg-slate-800 student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 hover:shadow-2xl cursor-pointer hover:z-40 relative"
                         />
 
                         <div className="min-w-0">
@@ -1004,7 +1004,7 @@ export const RankingView: React.FC<RankingViewProps> = ({
                             <img
                               src={st.avatar}
                               alt={st.name}
-                              className="w-8 h-8 rounded-full object-cover bg-slate-800"
+                              className="w-8 h-8 rounded-full object-cover bg-slate-800 student-avatar-zoom transition-transform duration-300 ease-out hover:scale-150 hover:shadow-2xl cursor-pointer hover:z-40 relative"
                             />
                             <div>
                               <span className="font-bold block text-slate-100">{st.name}</span>
